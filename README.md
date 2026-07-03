@@ -25,6 +25,8 @@ Two domains, one discipline:
 
 ## How I work
 
+Shared terms are defined once in the [trust vocabulary](trust-vocabulary.md) so definitions don't drift between repos.
+
 - **Claims match code.** Docs describing enforcement are validated against what validators actually enforce.
 - **Fail closed on ambiguity.** Stale, unreviewed, or unverifiable data doesn't ship as clean output.
 - **Boundaries before features.** Privacy, governance, and non-claims are written down before intake pipelines are built.
