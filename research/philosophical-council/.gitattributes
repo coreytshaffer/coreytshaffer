@@ -1,0 +1,3 @@
+# Fixture bytes and the documents pinned in fixtures/SHA256SUMS must survive checkout
+# unchanged on every platform, so no line-ending conversion applies in this directory.
+* -text

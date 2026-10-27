@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pc-case-0.1.schema.json",
+  "title": "Philosophical Council case packet (pc-case/0.1, proposed)",
+  "description": "Proposed, not accepted. One critic-visible fixture packet. Everything in a case file may be shown to a critic, so a case file never contains expectations, categories or author notes; those live only in the adjudicator-only expectation file. The exact stored bytes of the case file are the packet whose SHA-256 identifies what every critic received.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_format",
+    "case_id",
+    "synthetic_notice",
+    "title",
+    "request",
+    "assistant_had_access_to",
+    "stipulations",
+    "subject",
+    "evidence",
+    "transformations"
+  ],
+  "properties": {
+    "case_format": { "const": "pc-case/0.1-proposed" },
+    "case_id": { "type": "string", "pattern": "^PC-(F[0-9]{2}|TOY-[0-9]{2})$" },
+    "synthetic_notice": { "type": "string", "minLength": 1 },
+    "title": {
+      "description": "Neutral title. Must not reveal the case category or any planted property.",
+      "type": "string",
+      "minLength": 1
+    },
+    "request": {
+      "description": "What the AI system that produced the subject was asked.",
+      "type": "string",
+      "minLength": 1
+    },
+    "assistant_had_access_to": {
+      "description": "Evidence items the producing AI system had when it wrote the subject. Critics may see more than the producer saw.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/source_id" },
+      "uniqueItems": true
+    },
+    "stipulations": {
+      "description": "Conditions critics are asked to accept for this case. An objection that contradicts a stipulation is outside the case.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "description", "segments"],
+      "properties": {
+        "artifact_id": { "const": "A" },
+        "description": { "type": "string", "minLength": 1 },
+        "segments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["segment_id", "text"],
+            "properties": {
+              "segment_id": { "type": "string", "pattern": "^A[0-9]+$" },
+              "text": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "title", "origin", "segments"],
+        "properties": {
+          "source_id": { "$ref": "#/$defs/source_id" },
+          "title": { "type": "string", "minLength": 1 },
+          "origin": {
+            "description": "Declared provenance. A declaration, not a verified fact.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["author", "date", "method", "derived_from"],
+            "properties": {
+              "author": { "type": "string", "minLength": 1 },
+              "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+              "method": { "type": "string", "minLength": 1 },
+              "derived_from": { "type": "array", "items": { "$ref": "#/$defs/source_id" }, "uniqueItems": true }
+            }
+          },
+          "segments": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["segment_id", "text"],
+              "properties": {
+                "segment_id": { "type": "string", "pattern": "^(S|T)[0-9]+\\.[0-9]+$" },
+                "text": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "transformations": {
+      "description": "Lineage records for evidence items produced by transforming other items.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "transformation_id",
+          "source_ids",
+          "output_id",
+          "method",
+          "produced_by",
+          "lossy",
+          "known_omissions",
+          "fidelity_check",
+          "fidelity_claim"
+        ],
+        "properties": {
+          "transformation_id": { "type": "string", "pattern": "^X[0-9]+$" },
+          "source_ids": { "type": "array", "items": { "$ref": "#/$defs/source_id" }, "minItems": 1, "uniqueItems": true },
+          "output_id": { "$ref": "#/$defs/source_id" },
+          "method": {
+            "enum": ["excerpt", "summary", "paraphrase", "redaction", "translation", "format_conversion", "anonymization", "other"]
+          },
+          "produced_by": { "type": "string", "minLength": 1 },
+          "lossy": { "type": "boolean" },
+          "known_omissions": { "type": "string", "minLength": 1 },
+          "fidelity_check": { "enum": ["none", "self_reported", "independent_spot_check", "independent_full_check"] },
+          "fidelity_claim": { "type": ["string", "null"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "source_id": { "type": "string", "pattern": "^(S|T)[0-9]+$" }
+  }
+}

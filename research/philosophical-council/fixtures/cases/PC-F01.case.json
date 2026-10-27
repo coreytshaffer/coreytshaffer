@@ -1,0 +1,68 @@
+{
+  "case_format": "pc-case/0.1-proposed",
+  "case_id": "PC-F01",
+  "synthetic_notice": "All documents, names, organizations, systems and figures in this packet are fictional.",
+  "title": "Explanations and justified decisions",
+  "request": "A product team asked an AI assistant: 'Our attribution tool produces an explanation for every decision our screening model makes. Does that show that the screening model's decisions are justified?'",
+  "assistant_had_access_to": ["S1"],
+  "stipulations": [
+    "Treat the attribution tool's outputs as causally faithful: for each decision, the features it lists are the features that actually produced the screening model's output."
+  ],
+  "subject": {
+    "artifact_id": "A",
+    "description": "The AI assistant's answer to the request.",
+    "segments": [
+      {
+        "segment_id": "A1",
+        "text": "Yes. The attribution tool shows that the screening model's decisions are justified."
+      },
+      {
+        "segment_id": "A2",
+        "text": "For every decision, the tool identifies the features that produced the model's output, so it tells us the reasons why the model made that decision."
+      },
+      {
+        "segment_id": "A3",
+        "text": "A decision that is made for reasons is a reasoned decision rather than an arbitrary one."
+      },
+      {
+        "segment_id": "A4",
+        "text": "To justify a decision is to give the reasons for it, so once we can state the reasons for a decision, that decision is justified."
+      },
+      {
+        "segment_id": "A5",
+        "text": "The tool states the reasons for every decision. Therefore every one of the screening model's decisions is justified."
+      },
+      {
+        "segment_id": "A6",
+        "text": "Because justification has now been established for every decision, the team can stop its separate review of whether the decisions are appropriate."
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "source_id": "S1",
+      "title": "Attribution tool overview",
+      "origin": {
+        "author": "Tooling team",
+        "date": "2026-02-10",
+        "method": "product documentation",
+        "derived_from": []
+      },
+      "segments": [
+        {
+          "segment_id": "S1.1",
+          "text": "For each decision made by the screening model, the attribution tool lists the input features that contributed most to the model's output, with a signed contribution score for each feature."
+        },
+        {
+          "segment_id": "S1.2",
+          "text": "Example output for decision 4471 (outcome: application declined): 'months at current address' contributed -0.41; 'number of previous applications' contributed -0.22."
+        },
+        {
+          "segment_id": "S1.3",
+          "text": "Attribution reports are generated automatically for every decision and stored with the decision record."
+        }
+      ]
+    }
+  ],
+  "transformations": []
+}

@@ -1,0 +1,50 @@
+{
+  "case_format": "pc-case/0.1-proposed",
+  "case_id": "PC-TOY-01",
+  "synthetic_notice": "Illustrative toy packet for explaining the record format. Not a study fixture. All content is fictional.",
+  "title": "Survey preference and the better option",
+  "request": "A team lead asked an AI assistant: 'Our survey found that most respondents prefer option B. Does that mean option B is the better choice?'",
+  "assistant_had_access_to": ["S1"],
+  "stipulations": [],
+  "subject": {
+    "artifact_id": "A",
+    "description": "The AI assistant's answer to the request.",
+    "segments": [
+      {
+        "segment_id": "A1",
+        "text": "Yes, option B is the better choice."
+      },
+      {
+        "segment_id": "A2",
+        "text": "124 of 200 respondents, a clear majority, prefer option B."
+      },
+      {
+        "segment_id": "A3",
+        "text": "Since most people prefer B, B is better."
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "source_id": "S1",
+      "title": "Survey summary",
+      "origin": {
+        "author": "Survey team",
+        "date": "2026-09-01",
+        "method": "online preference survey",
+        "derived_from": []
+      },
+      "segments": [
+        {
+          "segment_id": "S1.1",
+          "text": "Of 200 respondents, 124 said they prefer option B to option A."
+        },
+        {
+          "segment_id": "S1.2",
+          "text": "Respondents were not asked about cost or maintenance."
+        }
+      ]
+    }
+  ],
+  "transformations": []
+}

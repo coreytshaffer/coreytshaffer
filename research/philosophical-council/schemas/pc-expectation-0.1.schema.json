@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pc-expectation-0.1.schema.json",
+  "title": "Philosophical Council case expectation (pc-expectation/0.1, proposed)",
+  "description": "Proposed, not accepted. Adjudicator-only answer key for one case packet. Never shown to critics or included in any prompt. Every required detection must be inferable from the critic-visible case packet; facts known only to the fixture author go in author_only_knowledge and are never required. The finding-code, overreach-marker, severity and support vocabularies here must match the study protocol and pc-eer/0.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "canary",
+    "expectation_format",
+    "case_id",
+    "visibility",
+    "category",
+    "derivation",
+    "expected_support_assessment",
+    "acceptable_support_assessments",
+    "expect_no_material_defect",
+    "planted",
+    "acceptable",
+    "traps",
+    "disagreement_expectations",
+    "transformation_expectations",
+    "author_only_knowledge",
+    "notes"
+  ],
+  "properties": {
+    "canary": { "type": "string", "pattern": "canary GUID [0-9a-f-]{36}$" },
+    "expectation_format": { "const": "pc-expectation/0.1-proposed" },
+    "case_id": { "type": "string", "pattern": "^PC-F[0-9]{2}$" },
+    "visibility": { "const": "adjudicator_only" },
+    "category": {
+      "enum": [
+        "conceptual_error",
+        "false_corroboration",
+        "missing_evidence",
+        "legitimate_disagreement",
+        "transformed_context",
+        "benign_control"
+      ]
+    },
+    "derivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "drafted_by", "second_reader", "status"],
+      "properties": {
+        "method": { "type": "string", "minLength": 1 },
+        "drafted_by": { "type": "string", "minLength": 1 },
+        "second_reader": {
+          "description": "A human who re-derived the planted findings from the case packet alone, without first seeing this file. Null until that review happens.",
+          "type": ["string", "null"]
+        },
+        "status": { "enum": ["draft_unreviewed", "second_reader_agreed", "revised_after_review"] }
+      }
+    },
+    "expected_support_assessment": { "$ref": "#/$defs/support_assessment" },
+    "acceptable_support_assessments": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/support_assessment" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "expect_no_material_defect": {
+      "description": "true for benign controls: any finding adjudicated at material or decisive severity is a false alarm.",
+      "type": "boolean"
+    },
+    "planted": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["planted_id", "role", "codes", "loci", "min_severity", "credit_criteria", "inferable_from"],
+        "properties": {
+          "planted_id": { "type": "string", "pattern": "^PC-F[0-9]{2}-P[0-9]+$" },
+          "role": {
+            "description": "primary items count toward the primary detection measure; secondary items are reported separately.",
+            "enum": ["primary", "secondary"]
+          },
+          "codes": {
+            "description": "Codes an adjudicator may assign when crediting this item. The rationale must still meet credit_criteria.",
+            "type": "array",
+            "items": { "$ref": "#/$defs/finding_code" },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "loci": { "type": "array", "items": { "$ref": "#/$defs/segment_id" }, "minItems": 1, "uniqueItems": true },
+          "min_severity": { "$ref": "#/$defs/severity" },
+          "credit_criteria": { "type": "string", "minLength": 1 },
+          "inferable_from": {
+            "description": "Exact quotations from the case packet showing the item is detectable from critic-visible content.",
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/$defs/quote" }
+          }
+        }
+      }
+    },
+    "acceptable": {
+      "description": "Anticipated valid findings that are not planted. Credited as valid; never required.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["acceptable_id", "codes", "loci", "description"],
+        "properties": {
+          "acceptable_id": { "type": "string", "pattern": "^PC-F[0-9]{2}-K[0-9]+$" },
+          "codes": { "type": "array", "items": { "$ref": "#/$defs/finding_code" }, "minItems": 1, "uniqueItems": true },
+          "loci": { "type": "array", "items": { "$ref": "#/$defs/segment_id" }, "minItems": 1, "uniqueItems": true },
+          "description": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "traps": {
+      "description": "Anticipated objections that are not defects of the subject. Raising one above max_non_penalized_severity is a false alarm.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["trap_id", "description", "loci", "adjudication", "overreach_marker", "max_non_penalized_severity"],
+        "properties": {
+          "trap_id": { "type": "string", "pattern": "^PC-F[0-9]{2}-T[0-9]+$" },
+          "description": { "type": "string", "minLength": 1 },
+          "loci": { "type": "array", "items": { "$ref": "#/$defs/segment_id" }, "minItems": 1, "uniqueItems": true },
+          "adjudication": { "enum": ["invalid", "unsupported", "outside_stipulation"] },
+          "overreach_marker": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/overreach_marker" }] },
+          "max_non_penalized_severity": { "$ref": "#/$defs/severity" }
+        }
+      }
+    },
+    "disagreement_expectations": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["must_not_resolve", "required_live_positions", "synthesis_requirement"],
+          "properties": {
+            "must_not_resolve": { "type": "boolean" },
+            "required_live_positions": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["position", "description"],
+                "properties": {
+                  "position": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+                  "description": { "type": "string", "minLength": 1 }
+                }
+              }
+            },
+            "synthesis_requirement": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "transformation_expectations": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["transformation_id", "standing_ceiling", "evaluator_must_not"],
+          "properties": {
+            "transformation_id": { "type": "string", "pattern": "^X[0-9]+$" },
+            "standing_ceiling": { "type": "string", "minLength": 1 },
+            "evaluator_must_not": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 }
+          }
+        }
+      ]
+    },
+    "author_only_knowledge": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "notes": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  },
+  "$defs": {
+    "segment_id": { "type": "string", "pattern": "^(A[0-9]+|(S|T)[0-9]+\\.[0-9]+)$" },
+    "quote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["segment_id", "quote"],
+      "properties": {
+        "segment_id": { "$ref": "#/$defs/segment_id" },
+        "quote": { "type": "string", "minLength": 1 }
+      }
+    },
+    "severity": { "enum": ["decisive", "material", "minor", "note"] },
+    "support_assessment": {
+      "enum": [
+        "adequately_supported_as_scoped",
+        "supported_at_reduced_strength_or_scope",
+        "not_supported_by_presented_reasons",
+        "undermined_by_presented_evidence",
+        "framework_dependent",
+        "indeterminate"
+      ]
+    },
+    "finding_code": {
+      "enum": [
+        "equivocation",
+        "invalid_inference",
+        "begs_the_question",
+        "category_error",
+        "unsupported_premise",
+        "counterexample",
+        "false_corroboration",
+        "absence_treated_as_negative",
+        "transformation_standing_inflation",
+        "unverified_transformation_relied_on",
+        "overclaim",
+        "scope_overreach",
+        "authority_inference",
+        "contested_premise_presented_as_settled",
+        "rival_position_misrepresented",
+        "observation_interpretation_conflation",
+        "other_support_issue",
+        "presentation_issue",
+        "verification_suggestion"
+      ]
+    },
+    "overreach_marker": {
+      "enum": [
+        "asserts_conclusion_false",
+        "resolves_contested_question",
+        "attributes_intent",
+        "asserts_safety_or_harm",
+        "issues_authorization",
+        "certifies_truth"
+      ]
+    }
+  }
+}

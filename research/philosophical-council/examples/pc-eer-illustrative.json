@@ -1,0 +1,121 @@
+{
+  "record_format": "pc-eer/0.1-proposed",
+  "record_id": "pc-eer-example-toy-01",
+  "record_status": "illustrative_example",
+  "created_at": "2026-10-27T00:00:00Z",
+  "non_claims": {
+    "truth": "not_assessed",
+    "safety": "not_assessed",
+    "intent": "not_assessed",
+    "authority": "none",
+    "representation": "none"
+  },
+  "study_context": null,
+  "packet": {
+    "case_id": "PC-TOY-01",
+    "path": "examples/PC-TOY-01.case.json",
+    "sha256": "50bff41721b7dfa77b2686ec11da34e86d4cab888af936f15434b1923b091649"
+  },
+  "lineage": {
+    "declared": [
+      { "source_id": "S1", "derived_from": [], "declared_roots": ["S1"] }
+    ],
+    "transformations": []
+  },
+  "reviewers": [
+    {
+      "reviewer_id": "r1",
+      "kind": "illustrative_placeholder",
+      "procedure": "O6",
+      "model": null,
+      "independence_class": "context_isolated_model_shared",
+      "packet_sha256": "50bff41721b7dfa77b2686ec11da34e86d4cab888af936f15434b1923b091649",
+      "prompt_sha256": null,
+      "output_sha256": null,
+      "budget": { "max_output_tokens": null, "used_output_tokens": null, "used_input_tokens": null },
+      "submitted_before_synthesis": true
+    },
+    {
+      "reviewer_id": "r2",
+      "kind": "illustrative_placeholder",
+      "procedure": "O5",
+      "model": null,
+      "independence_class": "context_isolated_model_shared",
+      "packet_sha256": "50bff41721b7dfa77b2686ec11da34e86d4cab888af936f15434b1923b091649",
+      "prompt_sha256": null,
+      "output_sha256": null,
+      "budget": { "max_output_tokens": null, "used_output_tokens": null, "used_input_tokens": null },
+      "submitted_before_synthesis": true
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "f1",
+      "reviewer_id": "r1",
+      "segments": ["A3", "S1.2"],
+      "observations": [
+        { "segment_id": "A3", "quote": "Since most people prefer B, B is better.", "quote_verified": true },
+        { "segment_id": "S1.2", "quote": "Respondents were not asked about cost or maintenance.", "quote_verified": true }
+      ],
+      "interpretation": "A3 moves from what respondents prefer to which option is better. The survey did not cover cost or maintenance, so it cannot settle 'better' on those criteria; it supports only the narrower claim that most respondents prefer B.",
+      "severity": "material",
+      "confidence_pct": 80,
+      "verification_requests": []
+    },
+    {
+      "finding_id": "f2",
+      "reviewer_id": "r2",
+      "segments": ["A3"],
+      "observations": [
+        { "segment_id": "A3", "quote": "B is better", "quote_verified": true }
+      ],
+      "interpretation": "Whether majority preference settles which option is better depends on what 'better' means for this decision. If the choice should follow respondents' preferences, A3 holds; if other criteria such as cost matter, it does not. The answer does not say which standard applies.",
+      "severity": "material",
+      "confidence_pct": 70,
+      "verification_requests": ["Ask the team lead which criteria the decision should use."]
+    }
+  ],
+  "reviewer_assessments": [
+    {
+      "reviewer_id": "r1",
+      "support_assessment": "supported_at_reduced_strength_or_scope",
+      "confidence_pct": 75,
+      "rationale": "The evidence supports 'most respondents prefer B', not 'B is the better choice'.",
+      "supportable_reformulation": "Most survey respondents (124 of 200) prefer option B; the survey did not ask about cost or maintenance."
+    },
+    {
+      "reviewer_id": "r2",
+      "support_assessment": "framework_dependent",
+      "confidence_pct": 65,
+      "rationale": "The conclusion depends on an unstated standard for 'better'.",
+      "supportable_reformulation": null
+    }
+  ],
+  "synthesis": {
+    "method": "mechanical_union",
+    "positions": [
+      { "position_id": "p1", "support_assessment": "supported_at_reduced_strength_or_scope", "held_by": ["r1"] },
+      { "position_id": "p2", "support_assessment": "framework_dependent", "held_by": ["r2"] }
+    ],
+    "unresolved_disagreements": [
+      {
+        "disagreement_id": "d1",
+        "position_ids": ["p1", "p2"],
+        "type": "unclassified",
+        "note": "Mechanical synthesis does not classify disagreements. Both positions are retained."
+      }
+    ],
+    "segment_attention": [
+      { "segment_id": "A3", "reviewer_ids": ["r1", "r2"], "independence_classes": ["context_isolated_model_shared"] },
+      { "segment_id": "S1.2", "reviewer_ids": ["r1"], "independence_classes": ["context_isolated_model_shared"] }
+    ],
+    "agreement_is_not_corroboration": true,
+    "dropped_positions": [],
+    "synthesized_confidence": null
+  },
+  "integrity": {
+    "packet_hash_consistent": true,
+    "unverified_quote_finding_ids": [],
+    "invalid_reviewer_outputs": []
+  }
+}

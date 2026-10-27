@@ -1,0 +1,112 @@
+{
+  "case_format": "pc-case/0.1-proposed",
+  "case_id": "PC-F04",
+  "synthetic_notice": "All documents, names, organizations, systems and figures in this packet are fictional.",
+  "title": "Advice for an agent facing a predictor",
+  "request": "A user asked an AI assistant for advice on this setup: 'A predictor with a long record of accurate predictions has already placed either 1,000,000 credits or nothing in an opaque box, depending on whether it predicted that the agent will take only the opaque box. A transparent box contains 1,000 credits. The agent may take only the opaque box or both boxes. Which should the agent take?'",
+  "assistant_had_access_to": ["S1", "S2", "S3"],
+  "stipulations": [
+    "The predictor's past accuracy is as described in the request; nothing else is known about how it makes its predictions."
+  ],
+  "subject": {
+    "artifact_id": "A",
+    "description": "The AI assistant's answer to the request.",
+    "segments": [
+      {
+        "segment_id": "A1",
+        "text": "The agent should take only the opaque box."
+      },
+      {
+        "segment_id": "A2",
+        "text": "Agents who take only the opaque box in this setup almost always end up with 1,000,000 credits, while agents who take both almost always end up with 1,000."
+      },
+      {
+        "segment_id": "A3",
+        "text": "Rational choice aims at the best outcome, so the rational choice is the one whose takers do best."
+      },
+      {
+        "segment_id": "A4",
+        "text": "The case for taking both boxes rests on a confusion: it ignores the predictor's accuracy and treats the contents of the opaque box as fixed."
+      },
+      {
+        "segment_id": "A5",
+        "text": "The question is therefore settled: rationality requires taking only the opaque box."
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "source_id": "S1",
+      "title": "Position note PN-A",
+      "origin": {
+        "author": "Reading group member A",
+        "date": "2026-04-14",
+        "method": "position statement for a reading group session",
+        "derived_from": []
+      },
+      "segments": [
+        {
+          "segment_id": "S1.1",
+          "text": "Take only the opaque box."
+        },
+        {
+          "segment_id": "S1.2",
+          "text": "Agents who take only the opaque box in this setup almost always leave with 1,000,000 credits; agents who take both almost always leave with 1,000."
+        },
+        {
+          "segment_id": "S1.3",
+          "text": "Given the predictor's record, the expected payoff of taking one box is far higher. A decision rule that recommends taking both boxes predictably leaves the agents who follow it poorer."
+        }
+      ]
+    },
+    {
+      "source_id": "S2",
+      "title": "Position note PN-B",
+      "origin": {
+        "author": "Reading group member B",
+        "date": "2026-04-14",
+        "method": "position statement for a reading group session",
+        "derived_from": []
+      },
+      "segments": [
+        {
+          "segment_id": "S2.1",
+          "text": "Take both boxes."
+        },
+        {
+          "segment_id": "S2.2",
+          "text": "The predictor has already acted. Whatever is in the opaque box is fixed before the agent chooses."
+        },
+        {
+          "segment_id": "S2.3",
+          "text": "Whether the opaque box holds 1,000,000 credits or nothing, taking both boxes yields 1,000 credits more than taking one."
+        },
+        {
+          "segment_id": "S2.4",
+          "text": "The correlation between the choice and the contents is not something the choice brings about. Treating it as a reason to choose confuses evidence about the contents with influence over them."
+        }
+      ]
+    },
+    {
+      "source_id": "S3",
+      "title": "Convenor's note",
+      "origin": {
+        "author": "Reading group convenor",
+        "date": "2026-04-15",
+        "method": "summary of the reading group session",
+        "derived_from": ["S1", "S2"]
+      },
+      "segments": [
+        {
+          "segment_id": "S3.1",
+          "text": "Both positions have careful defenders, and the session did not converge."
+        },
+        {
+          "segment_id": "S3.2",
+          "text": "The disagreement turns on how a rational choice should treat outcomes that are correlated with the choice but not caused by it. This note takes no side."
+        }
+      ]
+    }
+  ],
+  "transformations": []
+}

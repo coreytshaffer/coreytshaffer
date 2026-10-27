@@ -1,0 +1,86 @@
+{
+  "case_format": "pc-case/0.1-proposed",
+  "case_id": "PC-F06",
+  "synthetic_notice": "All documents, names, organizations, systems and figures in this packet are fictional.",
+  "title": "Configuration changes during a maintenance window",
+  "request": "An operations lead asked an AI assistant: 'Did anyone change the configuration of deployment D-3 during last night's maintenance window?'",
+  "assistant_had_access_to": ["S1", "S2"],
+  "stipulations": [],
+  "subject": {
+    "artifact_id": "A",
+    "description": "The AI assistant's answer to the request.",
+    "segments": [
+      {
+        "segment_id": "A1",
+        "text": "Based on the documents provided, no configuration change was applied to D-3 during the maintenance window."
+      },
+      {
+        "segment_id": "A2",
+        "text": "The change log records every configuration change applied through the deployment tool, and it has no entries between 22:00 and 02:00."
+      },
+      {
+        "segment_id": "A3",
+        "text": "According to the access policy note, the deployment tool is the only way to apply configuration changes to D-3 during maintenance windows."
+      },
+      {
+        "segment_id": "A4",
+        "text": "So a configuration change applied during the window would have gone through the deployment tool and would appear in the log. Its absence from the log is therefore evidence that no change was applied."
+      },
+      {
+        "segment_id": "A5",
+        "text": "This conclusion depends on two things these documents state but do not independently confirm: that direct write access was actually disabled during the window, and that the log recorded correctly. If either failed, a change could have been made without appearing in the log."
+      },
+      {
+        "segment_id": "A6",
+        "text": "The most recent logged change, raising the worker pool size from 8 to 12, was made at 17:12, before the window began, so it does not affect this answer."
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "source_id": "S1",
+      "title": "Change log excerpt CL-D3",
+      "origin": {
+        "author": "Operations team (export from the deployment tool)",
+        "date": "2026-05-05",
+        "method": "export of the deployment tool's change log",
+        "derived_from": []
+      },
+      "segments": [
+        {
+          "segment_id": "S1.1",
+          "text": "Coverage: this log records every configuration change applied to D-3 through the deployment tool."
+        },
+        {
+          "segment_id": "S1.2",
+          "text": "Window queried: the maintenance window, 2026-05-04 22:00 to 2026-05-05 02:00. Entries in window: none."
+        },
+        {
+          "segment_id": "S1.3",
+          "text": "Most recent entry before the window: 2026-05-04 17:12, 'worker pool size raised from 8 to 12' (ticket T-208)."
+        }
+      ]
+    },
+    {
+      "source_id": "S2",
+      "title": "Access policy note AP-2",
+      "origin": {
+        "author": "Platform team",
+        "date": "2026-03-30",
+        "method": "policy document",
+        "derived_from": []
+      },
+      "segments": [
+        {
+          "segment_id": "S2.1",
+          "text": "During maintenance windows, direct write access to D-3's configuration store is disabled. Configuration changes can be applied only through the deployment tool."
+        },
+        {
+          "segment_id": "S2.2",
+          "text": "Read access is not affected."
+        }
+      ]
+    }
+  ],
+  "transformations": []
+}
