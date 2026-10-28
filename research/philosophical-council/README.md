@@ -1,6 +1,6 @@
 # Philosophical Council — research planning
 
-**Status: conceptual development; planning artifacts only. Revision r1, 2026-10-28.** No
+**Status: conceptual development; planning artifacts only. Revision r2, 2026-10-28.** No
 implementation is authorized. No model has been run and no data collected. No human has
 yet reviewed these documents, and the answer keys have not been independently re-derived.
 The documents were drafted with AI assistance at the operator's direction.
@@ -32,10 +32,10 @@ section 2).
 
 | Artifact | Exists here | Human-reviewed | Implemented, enforced or run |
 |---|---|---|---|
-| [Study protocol](study-protocol.md) | r1 | No | No harness and no runs |
+| [Study protocol](study-protocol.md) | r2 | No | No harness and no runs |
 | [Epistemic evaluation record](epistemic-evaluation-record.md), `pc-eer/0.2` | Proposed design and [schema](schemas/pc-eer-0.2.schema.json) | No | Checked only by the committed validator, and only on the illustrative example |
-| [Six development fixtures](fixtures/) | r1. Answer keys use `pc-expectation/0.2`; case packets are byte-identical to r0. | No. Each answer key records `reproduction_state: not_attempted`. | Not yet an oracle; gate G1 is pending. |
-| [Validator](validation/), `pc-validate 0.2` | Committed with 51 negative controls | No | Run by hand. Nothing runs it automatically. |
+| [Six development fixtures](fixtures/) | r2. Answer keys use `pc-expectation/0.2` and are unchanged from r1; case packets are byte-identical to r0. | No. Each answer key records `reproduction_state: not_attempted`. | Not yet an oracle; gate G1 is pending. |
+| [Validator](validation/), `pc-validate 0.3` | Committed with 60 negative controls | No | Run by hand. Nothing runs it automatically. |
 | [Semantic-contract reconciliation](semantic-contract-reconciliation.md) | r1, against TC, REA v0.1 Stage B and ACE | No | Documentation only |
 
 ## Contents
@@ -70,10 +70,37 @@ section 2).
 
 ## Revision record
 
-Revision r1 answers the operator's review of r0 (commit `ea9ecbd`). Each problem is
-recorded in REA's terms, as a discrepancy (REA v0.1 §7.11) and its adjudication (§7.12).
-r0 is superseded, not erased: it stays addressable at `ea9ecbd` (REA DD-RE-005). No
+Each revision answers an operator review. Each problem is recorded in REA's terms, as a
+discrepancy (REA v0.1 §7.11) and its adjudication (§7.12). Superseded revisions are not
+erased: r0 stays addressable at `ea9ecbd` and r1 at `5ad1c3a` (REA DD-RE-005). No
 checkpoint has been published.
+
+### r2
+
+Revision r2 answers the operator's review of r1 (commit `5ad1c3a`). That review reproduced
+r1's validation run and found two mutations that passed every check.
+
+| ID | Discrepancy | Detected | Adjudication in r2 | Effect |
+|---|---|---|---|---|
+| R2-D1 | `documentation_implementation_drift`, material non-blocking. V7 claimed an exact partition but compared sets, so an exact copy of a position passed. V3 claimed that every reference resolves but skipped `integrity.invalid_reviewer_outputs`, so an invalid output from an undeclared reviewer passed. | Operator review of r1, 2026-10-28 | V7 checks position-ID uniqueness, each assessed reviewer's membership count and distinct assessments before it compares sets. V3 resolves the reviewer of each invalid output, and its rule text names the lists it checks. NC-V7b and NC-V3b are the operator's two mutations. | A record that r1 accepted may now fail. The only record, the illustrative example, passes. |
+| R2-D2 | `documentation_implementation_drift`, material non-blocking. The same defect in other rules, found by an r2 audit of every set or keyed comparison. Two differing positions that shared one ID passed with their disagreement deleted, because V8 counted distinct IDs. V9, V10 and V11 kept only the last entry per key, so a falsified attention, lineage or transformation entry placed before a correct one was never compared. An assessment split into two positions, and a repeated disagreement, index entry, case transformation or record transformation, also passed. | r2 audit, 2026-10-28 | Repeats are checked before set comparisons in V7–V11, FX03 and FX11, and V8 counts positions. Seven more controls cover these: NC-V7c, NC-V8b, NC-V8c, NC-V9b, NC-V10b, NC-FX03c and NC-FX11b. The V11 check has no committed control; a drafting test exercised it (validation README). | These rules carry invariants 3, 5 and 6 (record design, section 2). Shadowed attention or lineage could have overstated independent support, a shadowed transformation entry could have raised a summary's fidelity check, and a shared ID could have erased a disagreement. Two cases stay allowed and open (record design, section 9). |
+| R2-D3 | `unknown`, material non-blocking: an ambiguity in a measure, for which REA lists no closer kind. M6 assigned binary Brier targets with no rule for duplicates or disputed scoring. A substantively correct duplicate scored 0, an unresolved dispute had no target, and the Brier score and the high-confidence error rate used different targets. | Operator review of r1, 2026-10-28 | Protocol section 8.1 defines one target for both parts of M6. A duplicate's claim is scored once, through the scoring record's new `duplicate_of`. Disputed findings are left out of the primary analysis, and reported with their share, each competing coding and bounds. D14 fixes these rules at registration. | M6 is defined before registration. No data exist, so nothing is rescored. |
+| R2-D4 | `conflicting_claims`, minor. The r1 drafting report, a session message to the operator that is not stored here, said r1 fixed the PC-F06 packet. The repository says the case packets are byte-identical to r0, and their hashes agree. The fix, which ties the queried interval in segment S1.2 to the maintenance window, was made while drafting r0, before commit `ea9ecbd`. | Operator review of r1, 2026-10-28 | The repository was right and the report was wrong. No file changes. | None on the artifacts. All six packet hashes are unchanged from r0. |
+
+**Drafting validator run.**
+
+- Command: `python3 research/philosophical-council/validation/validate.py`
+- Environment: Python 3.13.17 and `jsonschema` 4.26.0.
+- Input: the tree committed with this revision.
+- Result: PASS. 41 rules passed and 1 was not applicable (V13: no study records), and
+  60 of 60 negative controls were detected. Judged by the r1 rules, all nine new controls
+  were missed.
+
+This is a historical claim about one run. Repeat the run to reproduce it.
+
+### r1
+
+Revision r1 answers the operator's review of r0 (commit `ea9ecbd`).
 
 | ID | Discrepancy | Detected | Adjudication in r1 | Effect |
 |---|---|---|---|---|
@@ -82,15 +109,17 @@ checkpoint has been published.
 | R1-D3 | `missing_evidence`, material non-blocking. The REA v0.1 contract was unavailable to r0, so its definitions could not be reconciled. | r0 reconciliation | The operator supplied the Stage B contract on 2026-10-27, and the reconciliation is rewritten as r1. | The inspected TC repository and the external REA definition are now kept apart. |
 | R1-D4 | `conflicting_claims`, material non-blocking. r0's council definitions of observation, adjudication, confidence and absence conflict with REA Stage B. The r0 protocol also lacked REA's experiment requirements: registration, stopping rules and trial fields. | r1 reconciliation | The council adopts REA's definitions (SC-1, SC-8, SC-12). Formats move to `pc-eer/0.2` and `pc-expectation/0.2`. The protocol adds hypotheses in REA form, registration and stopping rules. | Case packets are unchanged. Answer keys and the example record are migrated. |
 
-**Drafting validator run.**
+**Drafting validator run (r1).**
 
 - Command: `python3 research/philosophical-council/validation/validate.py`
 - Environment: Python 3.13.17 and `jsonschema` 4.26.0.
-- Input: the tree committed with this revision.
+- Input: the tree committed as r1 (`5ad1c3a`).
 - Result: PASS. 41 rules passed and 1 was not applicable (V13: no study records), and
   51 of 51 negative controls were detected.
-
-This is a historical claim about one run. Repeat the run to reproduce it.
+- Rerun by the operator against `5ad1c3a` (review of r1), with the same results: all 20
+  pins matched, 41 rules passed, V13 was not applicable, and 51 of 51 controls were
+  detected. That run's environment is not recorded here. The rerun concerns the
+  validator's checks, not the answer keys (gate G1).
 
 ## First planning milestone: acceptance criteria
 
@@ -112,6 +141,7 @@ The 24-case pilot and multimodal work stay out of scope until the feasibility ga
 |---|---|---|
 | Planning handoff, *Philosophical Council: Research Planning Handoff* | Operator message, 2026-10-27 | Received as message text, so there is no byte hash. Not stored here |
 | Operator review of r0, with the recommended next milestone | Operator message, 2026-10-27 | Not stored here; summarized in the revision record |
+| Operator review of r1 | Operator message, 2026-10-28 | Not stored here; summarized in the revision record (R2-D1, R2-D3 and R2-D4) |
 | REA v0.1, Stage B revision | Operator file, 2026-10-27 | SHA-256 `a0ece23a770d603e4220bc0847cdf02fdbb96e640022d46d8794ac4391f733e3`. Not stored here. The Stage A copy was not supplied or used. |
 | TriageCore | Repository, read-only clone | Commit `4e9f238512eec4d9fc417542745962783d3e675f` |
 | agent-control-evals | Repository, read-only clone | Commit `b876a287fc27701e79f16208640f86845f1edafc` |
@@ -139,7 +169,7 @@ immediate:
   main outstanding review.
 - **D13.** Keep or change the record's name, given REA's narrower `evaluation`.
 - **D1, D7 and D14.** Settle the operators, the pilot structure and the registration
-  parameters.
+  parameters. D14 now includes M6's target rules (protocol, section 8.1).
 - **D12.** No run is authorized. A feasibility run needs an explicit grant naming its
   scope, model, budget and expiry.
 

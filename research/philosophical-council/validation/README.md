@@ -1,6 +1,6 @@
-# Validation — `pc-validate 0.2`
+# Validation — `pc-validate 0.3`
 
-**Status: proposed planning tooling, committed in revision r1.** It checks the
+**Status: proposed planning tooling, committed in revision r1 and revised in r2.** It checks the
 planning documents and data in this directory. It is not, and does not test, any council
 implementation. Nothing runs it automatically: there is no CI.
 
@@ -49,6 +49,45 @@ closed rather than passing without them.
 4. **Prints a report.** The header records the validator's and controls' SHA-256 and the
    Python and `jsonschema` versions. For a given checkout and environment the report
    contains no timestamps and no host paths, so a second run reproduces it exactly.
+
+## Repeated entries
+
+Every rule that claims an exact correspondence ("exactly once", a partition, a mirror)
+checks for repeats before it compares sets. Repeats inside a list of IDs are rejected by the
+schemas' `uniqueItems` (V0, FX01, FX02). Repeated entries in a list of objects are rejected by
+the rule itself, and r1 missed several of those. The operator's review of r1 found two
+mutations that passed every check, and an r2 audit of every set or keyed comparison found
+the same defect in more rules (README, revision record, R2-D1 and R2-D2). In the drafting
+run, the r1 rules missed every control below and the r2 rules detected each one.
+
+| Check | Rule | Control | Fault injected |
+|---|---|---|---|
+| Each invalid output names a declared reviewer | V3 | NC-V3b | The operator's second mutation: an invalid output from `ghost` |
+| Unique position IDs; each assessed reviewer held once | V7 | NC-V7b | The operator's first mutation: an exact copy of a position |
+| No assessment in two entries | V7 | NC-V7c | One assessment split into two positions |
+| Positions are counted, not their distinct IDs | V8 (and V7) | NC-V8b | Two differing positions share an ID, and their disagreement is deleted |
+| Unique disagreement IDs | V8 | NC-V8c | An exact copy of a disagreement |
+| One attention entry per segment | V9 | NC-V9b | An inflated entry followed by a correct one for the same segment |
+| One lineage entry per evidence item | V10 | NC-V10b | Falsified roots followed by a correct entry for the same source |
+| The index lists each case once | FX03 | NC-FX03c | A case listed twice |
+| Unique transformation IDs in a case | FX11 | NC-FX11b | A repeated transformation record |
+
+- **Shadowing.** NC-V9b and NC-V10b put a falsified entry before a correct one. A
+  comparison that keeps the last entry per key never sees the falsified one, which is how
+  r1 missed them.
+- **One check without a committed control.** V11's check that a record lists each
+  transformation once has no control. The illustrative record's packet has no
+  transformation, so a control would need a second example record. A drafting test built
+  a scratch record over PC-F05 in memory. The r1 rules accepted a repeated transformation
+  entry, and also a falsified fidelity check (`independent_spot_check` for a self-reported
+  summary) placed before a correct entry. The r2 rules rejected both under V11. The test
+  is not committed, so it cannot be rerun from this checkout.
+- **Allowed on purpose.** Two disagreements with different IDs over the same positions,
+  and one reviewer listed more than once in `invalid_reviewer_outputs`. The
+  [record design](../epistemic-evaluation-record.md), section 9, says why both are open.
+- **`json_append`.** Controls can append to an array, so a control can state a mutation as
+  it was found, for example "append an exact copy of a position". The controls format is
+  `pc-negative-controls/0.3`.
 
 ## What a pass establishes, and what it does not
 
@@ -115,6 +154,8 @@ This validator re-implements and extends those checks, so its results can be rep
 ## Changing the rules
 
 - **A new rule** needs at least one negative control; otherwise the run fails.
+- **Exactness.** A rule that claims "exactly once", a partition or a mirror must check for
+  repeats, or compare counts, before it compares sets.
 - **Rule IDs.** They are cited in the record design and protocol. Renumbering one needs a
   revision of both.
 - **Controls** are test data. Weakening one to make a run pass defeats its purpose. If a

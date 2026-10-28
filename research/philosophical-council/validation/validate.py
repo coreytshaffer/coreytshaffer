@@ -28,6 +28,7 @@ import json
 import posixpath
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 try:
@@ -35,7 +36,7 @@ try:
 except ImportError:  # schema rules are then reported as not run, and the run fails
     jsonschema = None
 
-VALIDATOR_VERSION = "pc-validate 0.2"
+VALIDATOR_VERSION = "pc-validate 0.3"
 
 RULES = {
     "F01": "Data files (JSON and SHA256SUMS) contain only ASCII bytes",
@@ -45,7 +46,7 @@ RULES = {
     "SCH01": "Schema files are the expected set and are valid JSON Schema Draft 2020-12",
     "FX01": "Case packets conform to pc-case/0.1",
     "FX02": "Answer keys conform to pc-expectation/0.2",
-    "FX03": "index.json lists exactly the case and answer-key files present, with matching categories, existing pinned documents and the canary",
+    "FX03": "index.json lists each case and answer-key file present exactly once, with matching categories, existing pinned documents and the canary",
     "FX04": "File names, case IDs and index entries agree",
     "FX05": "Case packets contain no answer-key fields and no canary text",
     "FX06": "Case titles contain no category words",
@@ -53,7 +54,7 @@ RULES = {
     "FX08": "Evidence segments are numbered per source without gaps, and segment IDs are unique",
     "FX09": "Declared lineage names existing sources and is acyclic",
     "FX10": "assistant_had_access_to names existing sources",
-    "FX11": "Transformation records name existing items, and each output declares its sources in derived_from",
+    "FX11": "Transformation IDs are unique, transformation records name existing items, and each output declares its sources in derived_from",
     "FX12": "Every case has an answer key and every answer key a case",
     "FX13": "expected_support_assessment is among the acceptable assessments",
     "FX14": "Benign controls plant nothing and expect no material defect; every other case plants a primary item",
@@ -67,15 +68,15 @@ RULES = {
     "V0": "Records conform to pc-eer/0.2",
     "V1": "packet.sha256 equals the SHA-256 of the packet bytes, and case IDs agree",
     "V2": "packet_hash_consistent matches the reviewers' packet hashes",
-    "V3": "Reviewer and finding IDs are unique and every reference resolves",
+    "V3": "Reviewer and finding IDs are unique, and every finding, assessment and invalid output names a declared reviewer",
     "V4": "Each valid reviewer has exactly one assessment",
     "V5": "Quotation source_verification matches a byte-exact substring check, and integrity lists flagged findings truthfully",
     "V6": "Findings citing segments absent from the packet are listed in integrity.unknown_segment_finding_ids",
-    "V7": "Positions plus dropped positions partition the reviewer assessments; none dropped by mechanical synthesis",
-    "V8": "Disagreements reference listed positions, and differing positions are covered by an open disagreement",
-    "V9": "segment_attention is the projection of the findings, with correct independence classes",
-    "V10": "lineage.declared mirrors the packet's derived_from metadata and its roots",
-    "V11": "lineage.transformations mirrors the packet's transformation records",
+    "V7": "Positions plus dropped positions partition the assessments exactly: unique position IDs, each assessed reviewer once under its own assessment, no assessment twice; none dropped by mechanical synthesis",
+    "V8": "Disagreement IDs are unique, disagreements reference listed positions, and differing positions are each covered by an open disagreement",
+    "V9": "segment_attention is the projection of the findings, one entry per segment, with correct independence classes",
+    "V10": "lineage.declared mirrors the packet's derived_from metadata and its roots, one entry per evidence item",
+    "V11": "lineage.transformations mirrors the packet's transformation records, one entry each",
     "V12": "Every reviewer submitted before synthesis; single_reviewer has exactly one reviewer",
     "V13": "Study records: the condition matches the reviewers and the synthesis method",
     "PIN01": "Every SHA256SUMS entry is well formed, exists and matches the file bytes",
@@ -146,6 +147,11 @@ class Report:
 
 def sha256(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def repeated(values):
+    """Values that occur more than once. Checked before any set comparison, which would hide them."""
+    return sorted((value for value, count in Counter(values).items() if count > 1), key=str)
 
 
 def load_tree(root):
@@ -299,6 +305,8 @@ def check_case(path, case, report):
     for sid in case.get("assistant_had_access_to", []):
         if sid not in graph:
             report.fail("FX10", path, f"assistant_had_access_to names unknown source {sid!r}")
+    for dup in repeated(x.get("transformation_id") for x in case.get("transformations", [])):
+        report.fail("FX11", path, f"transformation ID {dup} is used more than once")
     for x in case.get("transformations", []):
         tid = x.get("transformation_id")
         for sid in list(x.get("source_ids", [])) + [x.get("output_id")]:
@@ -397,6 +405,9 @@ def check_fixtures(files, parsed, validators, report):
         if not CANARY.search(str(index.get("canary", ""))):
             report.fail("FX03", "fixtures/index.json", "canary missing")
         entries = index.get("cases", [])
+        for key in ("case_id", "case_file", "expectation_file"):
+            for dup in repeated(e.get(key) for e in entries):
+                report.fail("FX03", "fixtures/index.json", f"{key} {dup} is listed more than once")
         listed_cases = {posixpath.join("fixtures", e.get("case_file", "")) for e in entries}
         listed_exps = {posixpath.join("fixtures", e.get("expectation_file", "")) for e in entries}
         if listed_cases != present_case_files:
@@ -463,6 +474,9 @@ def check_record(path, rec, files, parsed, validators, report):
     for a in assessments:
         if a.get("reviewer_id") not in by_id:
             report.fail("V3", path, f"assessment names unknown reviewer {a.get('reviewer_id')!r}")
+    for x in integrity.get("invalid_reviewer_outputs", []):
+        if x.get("reviewer_id") not in by_id:
+            report.fail("V3", path, f"invalid_reviewer_outputs names unknown reviewer {x.get('reviewer_id')!r}")
 
     invalid = {x.get("reviewer_id") for x in integrity.get("invalid_reviewer_outputs", [])}
     assessed = sorted(a.get("reviewer_id") for a in assessments)
@@ -496,30 +510,37 @@ def check_record(path, rec, files, parsed, validators, report):
     if unknown != set(integrity.get("unknown_segment_finding_ids", [])):
         report.fail("V6", path, "integrity.unknown_segment_finding_ids does not list exactly the findings citing absent segments")
 
-    by_value = {}
-    for a in assessments:
-        by_value.setdefault(a.get("support_assessment"), set()).add(a.get("reviewer_id"))
-    listed = {}
-    for p in synthesis.get("positions", []) + synthesis.get("dropped_positions", []):
-        listed.setdefault(p.get("support_assessment"), set()).update(p.get("held_by", []))
-    if listed != by_value:
-        report.fail("V7", path, "positions plus dropped_positions must exactly partition the reviewer assessments")
+    positions = synthesis.get("positions", [])
+    entries = positions + synthesis.get("dropped_positions", [])
+    for dup in repeated(p.get("position_id") for p in positions):
+        report.fail("V7", path, f"position ID {dup} is used more than once")
+    for dup in repeated(p.get("support_assessment") for p in entries):
+        report.fail("V7", path, f"assessment {dup} appears in more than one position or dropped position")
+    held_pairs = Counter((r, p.get("support_assessment")) for p in entries for r in p.get("held_by", []))
+    assessed_pairs = Counter((a.get("reviewer_id"), a.get("support_assessment")) for a in assessments)
+    if held_pairs != assessed_pairs:
+        report.fail("V7", path, "positions plus dropped_positions must hold each assessed reviewer exactly once, under that reviewer's assessment")
     if synthesis.get("method") in ("single_reviewer", "mechanical_union") and synthesis.get("dropped_positions"):
         report.fail("V7", path, f"dropped_positions must be empty for {synthesis.get('method')}")
 
-    position_ids = {p.get("position_id") for p in synthesis.get("positions", [])}
+    disagreements = synthesis.get("unresolved_disagreements", [])
+    for dup in repeated(d.get("disagreement_id") for d in disagreements):
+        report.fail("V8", path, f"disagreement ID {dup} is used more than once")
+    position_ids = {p.get("position_id") for p in positions}
     covered = set()
-    for d in synthesis.get("unresolved_disagreements", []):
+    for d in disagreements:
         if not set(d.get("position_ids", [])) <= position_ids:
             report.fail("V8", path, f"disagreement {d.get('disagreement_id')} references a position that is not listed")
         covered |= set(d.get("position_ids", []))
-    if len(position_ids) > 1 and covered != position_ids:
-        report.fail("V8", path, "positions differ but no open disagreement covers all of them")
+    if len(positions) > 1 and any(p.get("position_id") not in covered for p in positions):
+        report.fail("V8", path, "positions differ but some position is in no open disagreement")
 
     attention = {}
     for f in findings:
         for s in f.get("segments", []):
             attention.setdefault(s, set()).add(f.get("reviewer_id"))
+    for dup in repeated(a.get("segment_id") for a in synthesis.get("segment_attention", [])):
+        report.fail("V9", path, f"segment_attention lists {dup} more than once")
     recorded = {a.get("segment_id"): set(a.get("reviewer_ids", [])) for a in synthesis.get("segment_attention", [])}
     if recorded != attention:
         report.fail("V9", path, "segment_attention is not the projection of the findings' segments")
@@ -529,6 +550,8 @@ def check_record(path, rec, files, parsed, validators, report):
             report.fail("V9", path, f"independence_classes for {a.get('segment_id')} do not match its reviewers")
 
     graph = lineage_graph(packet)
+    for dup in repeated(d.get("source_id") for d in rec.get("lineage", {}).get("declared", [])):
+        report.fail("V10", path, f"lineage.declared lists {dup} more than once")
     declared = {d.get("source_id"): d for d in rec.get("lineage", {}).get("declared", [])}
     if set(declared) != set(graph):
         report.fail("V10", path, "lineage.declared must list every evidence item exactly once")
@@ -537,6 +560,8 @@ def check_record(path, rec, files, parsed, validators, report):
             report.fail("V10", path, f"declared lineage for {sid} does not mirror the packet")
 
     in_packet = {x.get("transformation_id"): x for x in packet.get("transformations", [])}
+    for dup in repeated(x.get("transformation_id") for x in rec.get("lineage", {}).get("transformations", [])):
+        report.fail("V11", path, f"lineage.transformations lists {dup} more than once")
     in_record = {x.get("transformation_id"): x for x in rec.get("lineage", {}).get("transformations", [])}
     if set(in_packet) != set(in_record):
         report.fail("V11", path, "lineage.transformations must mirror the packet's transformation records")
@@ -665,17 +690,19 @@ def apply_control(files, control):
             continue
         if path not in mutated:
             raise ControlError(f"{path} is not among the loaded files")
-        if kind in ("json_set", "json_remove"):
+        if kind in ("json_set", "json_append", "json_remove"):
             doc = json.loads(mutated[path].decode("utf-8"))
             parent, last = _pointer_parent(doc, op["pointer"])
             try:
                 key = int(last) if isinstance(parent, list) else last
                 if kind == "json_set":
                     parent[key] = op["value"]
+                elif kind == "json_append":
+                    parent[key].append(op["value"])
                 else:
                     del parent[key]
-            except (KeyError, IndexError, ValueError) as exc:
-                raise ControlError(f"pointer {op['pointer']!r} does not resolve") from exc
+            except (AttributeError, KeyError, IndexError, ValueError) as exc:
+                raise ControlError(f"pointer {op['pointer']!r} does not resolve" + (" to an array" if kind == "json_append" else "")) from exc
             mutated[path] = (json.dumps(doc, indent=2) + "\n").encode("ascii")
         elif kind == "text_replace":
             text = mutated[path].decode("utf-8")

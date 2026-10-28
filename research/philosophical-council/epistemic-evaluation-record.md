@@ -1,9 +1,11 @@
 # Epistemic Evaluation Record — `pc-eer/0.2` (proposed)
 
-**Status: proposed planning artifact, revision r1 (2026-10-28).**
+**Status: proposed planning artifact, revision r2 (2026-10-28).**
 
 - Not accepted, and not used in any run.
 - Supersedes `pc-eer/0.1` (r0, commit `ea9ecbd`), which remains in history.
+- r2 tightens rules V3 and V7–V11 (section 6) and adds `duplicate_of` to the scoring
+  record (section 7.1). The record format and its schema are unchanged from r1.
 - The structural schema is [`schemas/pc-eer-0.2.schema.json`](schemas/pc-eer-0.2.schema.json).
 - The semantic rules in section 6 are implemented in
   [`validation/validate.py`](validation/validate.py). Each rule has a negative control.
@@ -207,20 +209,32 @@ is truthful about itself. A critic's own errors, such as a misquotation or a non
 segment, are **kept and flagged**, not rejected (warn-and-review). The rule fails only when
 the record misstates them (fail closed).
 
+Where a rule requires an exact correspondence, multiplicity is checked first. A repeated
+ID or entry fails before any comparison of sets, because such a comparison would hide the
+repeat. Repeats inside a list of IDs are rejected by the schema (`uniqueItems`, V0).
+Repeated entries in a list of objects are rejected by the rule itself. This follows REA: duplicate set members and map keys are invalid (§9.2), and exact
+identifier collisions are mechanically rejectable (§7.3). In r1 several rules compared
+sets or entries keyed by ID, with these results (README, revision record, R2-D1 and
+R2-D2):
+
+- a repeated position, disagreement, lineage entry or attention entry passed;
+- two differing positions that shared one ID passed with no disagreement recorded;
+- a falsified entry placed before a correct entry with the same key was never compared.
+
 | Rule | Requirement | On failure |
 |---|---|---|
 | V0 | The record conforms to `pc-eer/0.2`. | fail closed |
 | V1 | `packet.sha256` equals the SHA-256 of the packet bytes, and the case IDs agree. | fail closed |
 | V2 | `packet_hash_consistent` is true exactly when every reviewer's packet hash equals `packet.sha256`. A truthful `false` keeps the run but excludes it from scoring. | fail closed |
-| V3 | Reviewer and finding IDs are unique, and every reference resolves. | fail closed |
+| V3 | Reviewer and finding IDs are unique. Every finding, assessment and invalid output names a declared reviewer. Position holders and segment attention are checked by exact comparison in V7 and V9. | fail closed |
 | V4 | Each valid reviewer has exactly one assessment. Invalid outputs are listed in `integrity`. | fail closed |
 | V5 | Each checked quotation's `source_verification` matches a byte-exact substring check. The integrity lists of mismatched and unverified findings are exactly right. | Misquotation: warn-and-review. Misstated status: fail closed. |
 | V6 | Findings citing segments absent from the packet are exactly those listed in `unknown_segment_finding_ids`. | Unknown segment: warn-and-review. Misstated list: fail closed. |
-| V7 | Positions plus dropped positions exactly partition the assessments. None is dropped by `single_reviewer` or `mechanical_union`. | fail closed |
-| V8 | Disagreements reference listed positions, and differing positions are covered by an open disagreement. | fail closed |
-| V9 | `segment_attention` is the projection of the findings, with correct independence classes. | fail closed |
-| V10 | `lineage.declared` mirrors the packet's `derived_from` metadata and its roots. | fail closed |
-| V11 | `lineage.transformations` mirrors the packet's transformation records, and effect citations resolve. | fail closed |
+| V7 | Positions plus dropped positions exactly partition the assessments. Position IDs are unique, each assessed reviewer is held exactly once under that reviewer's own assessment, and no assessment appears in two entries. None is dropped by `single_reviewer` or `mechanical_union`. | fail closed |
+| V8 | Disagreement IDs are unique, and disagreements reference listed positions. When there is more than one position, each one is in an open disagreement; positions are counted, not their distinct IDs. | fail closed |
+| V9 | `segment_attention` is the projection of the findings, with one entry per segment and correct independence classes. | fail closed |
+| V10 | `lineage.declared` mirrors the packet's `derived_from` metadata and its roots, with one entry per evidence item. | fail closed |
+| V11 | `lineage.transformations` mirrors the packet's transformation records, with one entry each, and effect citations resolve. | fail closed |
 | V12 | Every reviewer submitted before synthesis, and `single_reviewer` has exactly one reviewer. | fail closed |
 | V13 | For study records, the condition matches the reviewers and the method. C0, C1 and C2 have one `naive`, `generic` or `O1-O6_sequential` reviewer respectively, with `single_reviewer`. C3 has at least two `generic` reviewers. C4 has one reviewer per operator. C3 and C4 use `mechanical_union` or `model_synthesis`. | fail closed |
 
@@ -249,6 +263,13 @@ The record refers to the `pc-eer` record by SHA-256.
 - `dimension`: `support` or `presentation`. Only `support` findings enter the detection
   and false-alarm measures.
 - `validity`: `valid`, `invalid`, `unsupported`, `outside_stipulation` or `duplicate`.
+  `duplicate` records redundancy, not error. It means the finding repeats a claim already
+  made by an earlier finding in the same reviewer output. Findings by different reviewers
+  are never duplicates of each other; their equivalence is a clustering judgment (protocol,
+  M10).
+- `duplicate_of`: required when `validity` is `duplicate`, and omitted otherwise. It names
+  the earlier finding, which must not itself be a duplicate. The repeated claim is scored
+  once, on that finding (protocol, section 8.1).
 - `match`: `planted:<id>`, `acceptable:<id>`, `trap:<id>`, `unanticipated` or `none`.
 - `code`: from section 7.4.
 - `scored_severity`.
@@ -372,6 +393,20 @@ free text:
 - **Integrity.** There are no signatures or attestation. Hashes establish byte identity
   only, and nothing here is tamper-proof (REA §18).
 - **Revision.** Argument revision and sycophancy dynamics are not modelled.
+- **Repeated invalid outputs.** The protocol does not yet say whether a failed critic call
+  is retried. If it is, one reviewer could have several invalid outputs. So V3 requires
+  only that each entry in `invalid_reviewer_outputs` names a declared reviewer, and allows
+  a reviewer to appear more than once. V4 treats any listed reviewer as having no valid
+  output. A retry policy would need an attempt identifier.
+- **Repeated disagreements.** V8 rejects a repeated disagreement ID. It allows two
+  disagreements with different IDs over the same positions, because the format does not yet
+  say whether that is one discrepancy recorded twice or two distinct ones. REA §7.3 makes
+  only exact identifier collisions mechanically rejectable; differently identified
+  equivalents are preserved and linked for review.
+- **Collection semantics.** REA requires every collection to declare `list`, `set`, `map`
+  or `multiset` semantics and its duplicate behaviour (§9.2; §20, criterion 26). Council
+  schemas do not declare these per collection; the V-rules enforce them for the keyed
+  collections only. Declaring them in the schemas is open.
 - **Community input.** It is open whether a field should mark questions that turn on
   particular people's values. `representation: none` is the floor.
 - **REA envelope export,** and the record's name (D13). See the

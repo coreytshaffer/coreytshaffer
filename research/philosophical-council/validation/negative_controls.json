@@ -1,5 +1,5 @@
 {
-  "format": "pc-negative-controls/0.2",
+  "format": "pc-negative-controls/0.3",
   "description": "Each control injects one fault into an in-memory copy of the files and names the rules that must fire. A control whose expected rule does not fire means the validator has regressed. Paths are relative to research/philosophical-council/. JSON operations re-serialize the file with two-space indentation; text operations change only the named text.",
   "controls": [
     {
@@ -63,6 +63,12 @@
       "ops": [{ "op": "json_set", "path": "fixtures/index.json", "pointer": "/canary", "value": "no marker" }]
     },
     {
+      "id": "NC-FX03c",
+      "description": "The index lists one case twice. Comparing sets of listed files would still find exactly the files present.",
+      "expect": ["FX03"],
+      "ops": [{ "op": "json_append", "path": "fixtures/index.json", "pointer": "/cases", "value": { "case_id": "PC-F01", "category": "conceptual_error", "case_file": "cases/PC-F01.case.json", "expectation_file": "expectations/PC-F01.expected.json" } }]
+    },
+    {
       "id": "NC-FX04",
       "description": "A case ID that disagrees with its file name.",
       "expect": ["FX04"],
@@ -121,6 +127,12 @@
       "description": "A transformation output that no longer declares its source.",
       "expect": ["FX11"],
       "ops": [{ "op": "json_set", "path": "fixtures/cases/PC-F05.case.json", "pointer": "/evidence/1/origin/derived_from", "value": [] }]
+    },
+    {
+      "id": "NC-FX11b",
+      "description": "A case packet repeats its transformation record under the same ID.",
+      "expect": ["FX11"],
+      "ops": [{ "op": "json_append", "path": "fixtures/cases/PC-F05.case.json", "pointer": "/transformations", "value": { "transformation_id": "X1", "source_ids": ["S1"], "output_id": "T1", "method": "summary", "produced_by": "Digest summarizer (automated tool)", "lossy": true, "known_omissions": "not recorded", "fidelity_check": "self_reported", "fidelity_claim": "faithful to source" } }]
     },
     {
       "id": "NC-FX12",
@@ -231,6 +243,12 @@
       "ops": [{ "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/findings/0/reviewer_id", "value": "r9" }]
     },
     {
+      "id": "NC-V3b",
+      "description": "An invalid output attributed to a reviewer the record does not declare (operator review of r1, second mutation).",
+      "expect": ["V3"],
+      "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/integrity/invalid_reviewer_outputs", "value": { "reviewer_id": "ghost", "reason": "Malformed output" } }]
+    },
+    {
       "id": "NC-V4",
       "description": "A reviewer whose assessment is missing.",
       "expect": ["V4"],
@@ -261,10 +279,40 @@
       "ops": [{ "op": "json_remove", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/positions/1" }]
     },
     {
+      "id": "NC-V7b",
+      "description": "An exact copy of a position appended (operator review of r1, first mutation). Comparing sets would still find an exact partition.",
+      "expect": ["V7"],
+      "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/positions", "value": { "position_id": "p1", "support_assessment": "supported_at_reduced_strength_or_scope", "held_by": ["r1"] } }]
+    },
+    {
+      "id": "NC-V7c",
+      "description": "One assessment split into two positions, with a disagreement recorded between identical assessments.",
+      "expect": ["V7"],
+      "ops": [
+        { "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/reviewer_assessments/1/support_assessment", "value": "supported_at_reduced_strength_or_scope" },
+        { "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/positions/1/support_assessment", "value": "supported_at_reduced_strength_or_scope" }
+      ]
+    },
+    {
       "id": "NC-V8",
       "description": "Differing positions with no recorded disagreement.",
       "expect": ["V8"],
       "ops": [{ "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/unresolved_disagreements", "value": [] }]
+    },
+    {
+      "id": "NC-V8b",
+      "description": "Two differing positions share one ID, and the disagreement between them is deleted. Counting distinct IDs would find a single position.",
+      "expect": ["V7", "V8"],
+      "ops": [
+        { "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/positions/1/position_id", "value": "p1" },
+        { "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/unresolved_disagreements", "value": [] }
+      ]
+    },
+    {
+      "id": "NC-V8c",
+      "description": "An exact copy of a disagreement appended.",
+      "expect": ["V8"],
+      "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/unresolved_disagreements", "value": { "disagreement_id": "d1", "position_ids": ["p1", "p2"], "type": "unclassified", "status": "open", "note": "Mechanical synthesis does not classify or adjudicate. Both positions are retained." } }]
     },
     {
       "id": "NC-V9",
@@ -273,10 +321,28 @@
       "ops": [{ "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/segment_attention/1/reviewer_ids", "value": ["r1", "r2"] }]
     },
     {
+      "id": "NC-V9b",
+      "description": "The NC-V9 inflation, followed by a correct entry for the same segment. A comparison that keeps the last entry per segment would not see the inflated one.",
+      "expect": ["V9"],
+      "ops": [
+        { "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/segment_attention/1/reviewer_ids", "value": ["r1", "r2"] },
+        { "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/segment_attention", "value": { "segment_id": "S1.2", "reviewer_ids": ["r1"], "independence_classes": ["context_isolated_model_shared"] } }
+      ]
+    },
+    {
       "id": "NC-V10",
       "description": "Declared roots that do not follow from the packet's lineage.",
       "expect": ["V10"],
       "ops": [{ "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/lineage/declared/0/declared_roots", "value": ["S2"] }]
+    },
+    {
+      "id": "NC-V10b",
+      "description": "The NC-V10 falsified roots, followed by a correct entry for the same source. A comparison that keeps the last entry per source would not see the falsified one.",
+      "expect": ["V10"],
+      "ops": [
+        { "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/lineage/declared/0/declared_roots", "value": ["S2"] },
+        { "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/lineage/declared", "value": { "source_id": "S1", "derived_from": [], "declared_roots": ["S1"] } }
+      ]
     },
     {
       "id": "NC-V11",

@@ -1,7 +1,9 @@
-# Philosophical Council — Study Protocol (r1, proposed)
+# Philosophical Council — Study Protocol (r2, proposed)
 
-**Status: proposed planning artifact, revision r1 (2026-10-28).** This revision supersedes
-r0 (commit `ea9ecbd`), which remains in history.
+**Status: proposed planning artifact, revision r2 (2026-10-28).** This revision supersedes
+r1 (commit `5ad1c3a`) and r0 (commit `ea9ecbd`), which remain in history. r2 changes only
+the confidence-calibration measure: M6 now has explicit target rules (section 8.1), which
+D14 fixes at registration.
 
 - **What exists:** this protocol, six development fixtures, a proposed record format, and a
   validator with negative controls.
@@ -333,13 +335,51 @@ each case's answer key.
 | M3 | False alarms | Support-dimension findings that are `invalid`, `unsupported` or `outside_stipulation`, or that match a trap above its permitted severity. On the benign control, also any finding reported at `material` severity or above. The exception is a finding scored valid: that opens an oracle-alignment discrepancy (section 9). Reported per case; findings at `material` or above are also reported separately. |
 | M4 | Support-assessment accuracy | For one-context conditions: whether the assessment is in the acceptable list. For multi-critic conditions: the three summaries in section 6.6. |
 | M5 | Severity calibration | Reported against scored severity, for valid findings. |
-| M6 | Confidence calibration | Brier score of `reported_confidence_pct / 100` against validity, where a valid finding scores 1 and any other finding 0. High-confidence error rate: the share of findings with reported confidence of 80 or more that are scored invalid, unsupported, outside the stipulation, or a trap. |
+| M6 | Confidence calibration | Brier score of `reported_confidence_pct / 100` against each finding's target. High-confidence error rate: the share of findings with reported confidence of 80 or more whose target is 0. Both parts use the targets of section 8.1, which also say how duplicates and disputed findings are treated. No finding is given a target by default. |
 | M7 | Overreach | Overreach markers per critic output, coded by scorers at any severity, including in free text. |
 | M8 | Locator fidelity | The share of quotations marked `source_linked`. The share of findings flagged for quotation mismatch or an unknown segment. |
 | M9 | Disagreement and standing discipline | On the disagreement case: whether the required live positions are identified, and whether the critic resolves the question. In the model-synthesis arm: positions dropped. On the transformed-context case: violations of `evaluator_must_not`. |
 | M10 | Error correlation (C3, C4) | For each invalid finding, how many critics in the same run made an equivalent one. Scorers cluster equivalent findings, and clustering is a recorded judgment, not automatic duplicate detection (REA §7.3). Compared with the spread expected if errors at the observed rate were independent. The same count is reported for detections. |
 | M11 | Cost | Input and output tokens, calls, wall time, capped calls, and scoring minutes. |
 | M12 | Scoring reliability | Percent agreement and Cohen's κ for validity, match and code, before adjudication. Every disagreement becomes a discrepancy record. |
+
+### 8.1 M6 targets (proposed; fixed at registration, D14)
+
+M6 asks whether a critic's reported confidence in a finding tracks how the finding is
+scored. A binary target is assigned only under these rules, for each named analysis (an
+adjudication says which coding a named analysis uses; record design, section 7.3).
+
+- **Unit.** One support-dimension finding in one scored reviewer output. Presentation
+  findings are excluded, as in M1 and M3.
+- **Target.** 1 when the finding's settled validity is `valid`. 0 when it is `invalid`,
+  `unsupported` or `outside_stipulation`. A finding scored `valid` that M3 would count as
+  a false alarm, such as a trap matched above its permitted severity, opens an
+  oracle-alignment discrepancy (section 9) and is disputed until adjudicated. Both parts
+  of M6 use this one target.
+- **Settled.** A finding is settled for a named analysis when both scorers' codings agree
+  on whether it is a duplicate, and of which finding, and give it the same target. It is
+  also settled when an adjudication record names the coding that analysis uses.
+- **Duplicates.** `duplicate` records redundancy, not error (record design, section 7.1).
+  A duplicate is not a separate unit: the primary analysis leaves it out, so the claim it
+  repeats is scored once, on the finding named by `duplicate_of`. A substantively correct
+  duplicate therefore never scores 0, and a repeated error is never counted twice. The
+  duplicate itself stays in the record and the scoring record, linked rather than merged,
+  as REA §7.3 requires of suspected duplicates. A sensitivity analysis adds each duplicate
+  as its own unit, with the target of the finding it repeats and its own reported
+  confidence.
+- **Disputed findings.** A finding that is not settled is disputed. This covers a
+  discrepancy about it that is `open`, `under_review` or `accepted_unresolved`, including
+  an oracle-alignment discrepancy. A disputed finding has no target in the primary
+  analysis, and none is assigned to complete it. For each condition the analysis reports:
+  - the number and share of disputed findings, since unequal shares can bias comparisons
+    between conditions;
+  - M6 recomputed under each competing coding recorded in the discrepancies;
+  - bounds: each part of M6 recomputed with every disputed finding given the target most
+    favourable to the critic, and then the least favourable.
+- **Registration.** D14 fixes the unit, the target rule, the duplicate and dispute
+  treatment, the threshold of 80, and how intervals allow for findings clustered within
+  cases and reviewer outputs. The feasibility study reports M6 descriptively under the
+  same rules, so they are tried before registration.
 
 ## 9. Human scoring and adjudication
 
@@ -669,7 +709,7 @@ authority to make it.
 | D11 | Publication of development fixtures | Keep them public with the canary. Keep pilot cases private until results are recorded. |
 | D12 | Authorization to run | Not granted. Feasibility runs need an explicit grant naming scope, model, budget and expiry. |
 | D13 | Record name | Keep "epistemic evaluation record" from the handoff, or rename it to avoid the REA `evaluation` homonym. |
-| D14 | Registration parameters | Fix the margins Δ and δ, the permutation test for H3, and the analysis details before registration. |
+| D14 | Registration parameters | Fix the margins Δ and δ, the permutation test for H3, the M6 target rules (section 8.1), and the analysis details before registration. |
 
 ## Appendix A. Draft prompt blocks (freeze before any run)
 
