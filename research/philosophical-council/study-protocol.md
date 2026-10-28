@@ -1,11 +1,12 @@
-# Philosophical Council — Study Protocol (r5, proposed)
+# Philosophical Council — Study Protocol (r6, proposed)
 
-**Status: proposed planning artifact, revision r5 (2026-10-28).** This revision supersedes
-r4 (commit `72172c7`), r3 (`14de682`), r2 (`69d8739`), r1 (`5ad1c3a`) and r0 (`ea9ecbd`),
-which remain in history. r5 makes the call-accounting categories mutually exclusive and
-tracks parsing separately (section 6.8, G2, section 10). r4 separated decision D16 from
-the transport re-send restriction, now proposed decision D17. r3 applied D15 and D16; r2
-gave M6 explicit target rules (section 8.1).
+**Status: proposed planning artifact, revision r6 (2026-10-28).** This revision supersedes
+r5 (commit `291a81d`), r4 (`72172c7`), r3 (`14de682`), r2 (`69d8739`), r1 (`5ad1c3a`)
+and r0 (`ea9ecbd`), which remain in history. r6 records the operator's approval of D17:
+transport re-sends remain unsupported in `pc-eer/0.3` and this feasibility protocol.
+r5 made the call-accounting categories mutually exclusive and tracked parsing separately
+(section 6.8, G2, section 10). r4 separated D17 from D16; r3 applied D15 and D16; r2 gave
+M6 explicit target rules (section 8.1). D17 grants no authorization to run.
 
 - **What exists:** this protocol, six development fixtures, a proposed record format, and a
   validator with negative controls.
@@ -318,7 +319,7 @@ outputs that do not parse remain observations in the analysis. They are never dr
 (REA §14); section 6.8 says where a record lists each. A packet-hash mismatch fails
 closed: the run is kept but not scored.
 
-### 6.8 One completed output per reviewer (decision D16; proposed decision D17)
+### 6.8 One completed output per reviewer (decisions D16 and D17)
 
 A critic call is one trial (section 6.7), and each reviewer in a record is one trial.
 
@@ -335,12 +336,13 @@ A critic call is one trial (section 6.7), and each reviewer in a record is one t
   failure.
 - **Content-based retries: prohibited (D16, decided by the operator).** This is the "never
   requested again because of its content" rule above.
-- **Transport re-sends: unsupported in `pc-eer/0.3` (format limitation; D17 proposed, not
-  decided).** D16 does not cover sending a call again after a transport failure. The
-  format cannot record one faithfully: it has no attempt or output identities, so it
-  cannot keep both the failed attempt and a later outcome, and V4 allows each reviewer one
-  outcome. That limitation holds whatever D17 decides. D17 proposes keeping re-sends
-  unsupported in `pc-eer/0.3`.
+- **Transport re-sends: unsupported in `pc-eer/0.3` (D17, decided by the operator).** On
+  2026-10-28 the operator approved keeping this restriction for `pc-eer/0.3` and this
+  feasibility protocol. A call that ends in a transport failure is not sent again to
+  obtain a replacement response; its failed trial remains recorded. This is separate
+  from D16's content-based retry restriction. The format also has no attempt or output
+  identities to keep both a failed attempt and a later outcome, and V4 allows each
+  reviewer one outcome.
 - **Future retry support** of either kind needs explicit attempt and output identities and
   a defined accounting policy first: how attempts count against scheduled calls, budgets
   and G2, and which attempt's output is analysed (record design, section 9).
@@ -787,7 +789,7 @@ authority to make it.
 | D14 | Registration parameters | Fix the margins Δ and δ, the permutation test for H3, the M6 target rules (section 8.1), and the analysis details before registration. |
 | D15 | Disagreements over the same positions | **Decided** by the operator on 2026-10-28, in the review of r2. Different disagreement IDs over the same positions stay allowed, because the same positions can conflict over several distinct issues. Each disagreement states its scope; semantic duplication is left to human review; repeated IDs are rejected (V8). Scope: `pc-eer/0.3`. No expiration set. Implemented in r3 (section 6.6). |
 | D16 | Outputs per reviewer | **Decided** by the operator on 2026-10-28, in the review of r2. Repeated invalid entries for one reviewer are rejected within a trial. One completed output per reviewer per trial, with no retries based on the output's content. Transport failures are recorded separately. Future retries would need explicit attempt and output identities. Scope: this feasibility protocol. It does not address sending a call again after a transport failure; see D17. Implemented in r3 (section 6.8, V4). |
-| D17 | Transport re-sends | **Proposed, not decided.** Keep sending a call again after a transport failure unsupported in `pc-eer/0.3`. r3 recorded this restriction as part of D16, which did not cover it; r4 separates it (README, revision record, R4-D1). Basis: a format limitation, since `pc-eer/0.3` has no attempt or output identities and cannot keep both a failed attempt and a later outcome. The review of r3 recommended keeping the restriction. Scope if adopted: `pc-eer/0.3` and this feasibility protocol. Condition: future retry support needs explicit attempt and output identities and a defined accounting policy (section 6.8). Awaiting the operator. |
+| D17 | Transport re-sends | **Decided** by the operator on 2026-10-28, after the r5 review and a summary of the consequences; the operator replied "Approved". Re-sending a call after a transport failure remains unsupported: the failed trial is kept in `transport_failures` with `output_sha256` `no_output`, without a replacement call. Scope: `pc-eer/0.3` and this feasibility protocol. Condition: future retry support needs explicit attempt and output identities and a defined accounting policy (section 6.8). Expiration: not specified. Recorded in r6. This decision grants no run authorization. |
 
 ## Appendix A. Draft prompt blocks (freeze before any run)
 

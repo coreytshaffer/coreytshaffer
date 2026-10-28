@@ -1,6 +1,6 @@
 # Philosophical Council — research planning
 
-**Status: conceptual development; planning artifacts only. Revision r5, 2026-10-28.** No
+**Status: conceptual development; planning artifacts only. Revision r6, 2026-10-28.** No
 implementation is authorized. No model has been run and no data collected. No human has
 yet reviewed these documents, and the answer keys have not been independently re-derived.
 The documents were drafted with AI assistance at the operator's direction.
@@ -32,9 +32,9 @@ section 2).
 
 | Artifact | Exists here | Human-reviewed | Implemented, enforced or run |
 |---|---|---|---|
-| [Study protocol](study-protocol.md) | r5 | No | No harness and no runs |
+| [Study protocol](study-protocol.md) | r6 | No | No harness and no runs |
 | [Epistemic evaluation record](epistemic-evaluation-record.md), `pc-eer/0.3` | Proposed design and [schema](schemas/pc-eer-0.3.schema.json) | No | Checked only by the committed validator, and only on the three illustrative examples |
-| [Six development fixtures](fixtures/) | r5. Answer keys use `pc-expectation/0.2` and are unchanged from r1; case packets are byte-identical to r0. | No. Each answer key records `reproduction_state: not_attempted`. | Not yet an oracle; gate G1 is pending. |
+| [Six development fixtures](fixtures/) | r6. Answer keys use `pc-expectation/0.2` and are unchanged from r1; case packets are byte-identical to r0. | No. Each answer key records `reproduction_state: not_attempted`. | Not yet an oracle; gate G1 is pending. |
 | [Validator](validation/), `pc-validate 0.4` | Committed with 69 negative controls | No | Run by hand. Nothing runs it automatically. |
 | [Semantic-contract reconciliation](semantic-contract-reconciliation.md) | r1, against TC, REA v0.1 Stage B and ACE | No | Documentation only |
 
@@ -46,7 +46,7 @@ section 2).
   - the 2×2 design (C1–C4) and the operators O1–O6;
   - controls, measures, scoring and adjudication;
   - the feasibility gate, the pilot with stopping rules, and positioning;
-  - decisions D1–D14.
+  - decisions D1–D17.
 - **[`semantic-contract-reconciliation.md`](semantic-contract-reconciliation.md)**:
   - term-by-term comparison of the inspected TriageCore repository, REA v0.1 Stage B
     (an external research definition) and council usage;
@@ -75,7 +75,32 @@ section 2).
 Each revision answers an operator review. Each problem is recorded in REA's terms, as a
 discrepancy (REA v0.1 §7.11) and its adjudication (§7.12). Superseded revisions are not
 erased: r0 stays addressable at `ea9ecbd`, r1 at `5ad1c3a`, r2 at `69d8739`, r3 at
-`14de682` and r4 at `72172c7` (REA DD-RE-005). No checkpoint has been published.
+`14de682`, r4 at `72172c7` and r5 at `291a81d` (REA DD-RE-005). No checkpoint has been
+published.
+
+### r6
+
+Revision r6 records the operator's approval of D17 on 2026-10-28. After the r5 review and
+a summary of the consequences, the operator replied "Approved". Transport re-sends remain
+unsupported in `pc-eer/0.3` and this feasibility protocol: a transport-failed trial stays
+recorded, with no replacement call. Future retry support still needs explicit attempt
+and output identities and an accounting policy. No expiration was specified.
+
+The protocol (sections 6.8 and 16), record design (section 9) and record schema's
+description now state that D17 is decided. Earlier proposal states remain in this revision
+record as history. D16 is unchanged. This revision changes no schema constraint, validator
+rule, control, example, case packet or answer key, and grants no authorization to run.
+
+**Validation run (r6).**
+
+- Pins: `sha256sum -c SHA256SUMS`, from `fixtures/`.
+- Validator: `"$CODEX_PRIMARY_RUNTIME_PYTHON" research/philosophical-council/validation/validate.py`,
+  from the repository root, with the isolated dependency directory on `PYTHONPATH`.
+- Environment: Python 3.12.14 and `jsonschema` 4.26.0.
+- Input: the tree committed with this revision.
+- Result: both commands exited 0. All 25 pins matched; 41 rules passed, none failed or
+  were not run, and V13 was not applicable. All 69 controls were detected, including the
+  nine `exact` controls. These are structural checks only.
 
 ### r5
 
@@ -93,7 +118,7 @@ undecided.
 - Command: `cd research/philosophical-council/fixtures && sha256sum -c SHA256SUMS`, then
   `cd .. && python3 validation/validate.py`
 - Environment: Python 3.13.17 and `jsonschema` 4.26.0.
-- Input: the tree committed with this revision.
+- Input: the tree committed as r5 (`291a81d`).
 - Result: all 25 pins match. PASS: 41 rules passed and 1 was not applicable (V13: no
   study records), and 69 of 69 negative controls were detected, including the nine
   `exact` controls.
@@ -221,6 +246,7 @@ The 24-case pilot and multimodal work stay out of scope until the feasibility ga
 | Planning handoff, *Philosophical Council: Research Planning Handoff* | Operator message, 2026-10-27 | Received as message text, so there is no byte hash. Not stored here |
 | Operator review of r0, with the recommended next milestone | Operator message, 2026-10-27 | Not stored here; summarized in the revision record |
 | Operator review of r1 | Operator message, 2026-10-28 | Not stored here; summarized in the revision record (R2-D1, R2-D3 and R2-D4) |
+| Operator approval of D17 | Operator message, 2026-10-28 | Exact approval: "Approved", following the r5 review and a summary of D17's consequences. Recorded in r6 and protocol section 16; scoped to `pc-eer/0.3` and this feasibility protocol |
 | Review of r4, with an independent reproduction of r4's validation | Operator message, 2026-10-28 | Not stored here; summarized in the revision record (R5-D1 and the r4 run block) |
 | Review of r3, with recommendations | Operator message, 2026-10-28 | Not stored here; summarized in the revision record (R4-D1 to R4-D3) and as proposed decision D17. The reviewer could not locate `14de682` from their workspace |
 | Operator decisions on r2 | Operator message, 2026-10-28 | Not stored here; recorded as D15 and D16 (protocol, section 16) and in the revision record (R3-D1 to R3-D3). Made from the r2 report, without an independent check of `69d8739` |
@@ -244,7 +270,7 @@ README).
 
 ## Decisions needed before anything runs
 
-The full list is in protocol section 16. D10 (the REA contract), D15 and D16 are
+The full list is in protocol section 16. D10 (the REA contract), D15, D16 and D17 are
 resolved. The most immediate:
 
 - **D9.** Name a human second reader to re-derive the answer keys (gate G1). This is the
@@ -254,10 +280,6 @@ resolved. The most immediate:
   parameters. D14 now includes M6's target rules (protocol, section 8.1).
 - **D12.** No run is authorized. A feasibility run needs an explicit grant naming its
   scope, model, budget and expiry.
-- **D17.** Decide whether to keep sending a call again after a transport failure
-  unsupported in `pc-eer/0.3` (recommended; protocol, section 6.8). D16 does not cover it.
-  The format cannot record such a re-send faithfully whatever is decided, so supporting
-  one would first need attempt and output identities and an accounting policy.
 
 ## Relationship to the rest of this repository
 

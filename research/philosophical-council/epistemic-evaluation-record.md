@@ -1,6 +1,6 @@
 # Epistemic Evaluation Record — `pc-eer/0.3` (proposed)
 
-**Status: proposed planning artifact, revision r4 (2026-10-28).**
+**Status: proposed planning artifact, revision r6 (2026-10-28).**
 
 - Not accepted, and not used in any run.
 - Supersedes `pc-eer/0.2` (r1 and r2, last at commit `69d8739`) and `pc-eer/0.1` (r0,
@@ -9,9 +9,11 @@
   states its `scope`. `integrity` gains `transport_failures`, and a call that produced no
   output has `output_sha256` `no_output`. V3 and V4 change accordingly (section 6). A
   second illustrative record, over a packet with a transformation, is in `examples/`.
-- r4 separates the transport re-send restriction (proposed decision D17) from D16, and
-  adds a third illustrative record in which each reviewer outcome occurs. The format and
-  rules are unchanged from r3.
+- r6 records the operator's approval of D17: transport re-sends remain unsupported in
+  `pc-eer/0.3` and this feasibility protocol. The format and rules are unchanged.
+- r4 separated the transport re-send restriction (proposed at that revision as D17) from
+  D16, and added a third illustrative record in which each reviewer outcome occurs. The
+  format and rules are unchanged from r3.
 - r2 tightened V3 and V7–V11 and added `duplicate_of` to the scoring record (section 7.1).
 - The structural schema is [`schemas/pc-eer-0.3.schema.json`](schemas/pc-eer-0.3.schema.json).
 - The semantic rules in section 6 are implemented in
@@ -104,7 +106,7 @@ does not filter what the record's text says.
 | Scoring record | `interpretation` records by scorers, from an activity of kind `review` | Section 7.1. |
 | Discrepancy and adjudication records | `Discrepancy` (§7.11) and `adjudication` (§7.12) | Sections 7.2–7.3. |
 | Answer key | Claims about the case packet, source-linked by `inferable_from` quotations | Its `reproduction_state` (§5.5) stays `not_attempted` until a second reader re-derives it. |
-| Operator decisions D1–D14 | `decision` (§7.13) | Recorded outside council records, with scope, conditions and expiration. |
+| Operator decisions D1–D17 | `decision` (§7.13) | Recorded outside council records, with scope, conditions and expiration. |
 | H1–H4 | `hypothesis` (§7.6), with `HypothesisRegistration` (§7.7) | Evaluation happens only in the pilot, and only as separate records. |
 
 The record is not an REA `EpistemicRecord` envelope. It has no role discriminator, recording
@@ -421,9 +423,10 @@ free text:
 - **Retries.** Retries based on an output's content are prohibited (D16, decided).
   Sending a call again after a transport failure is unsupported in `pc-eer/0.3`. That is a
   format limitation: with no attempt or output identities, a record cannot keep both the
-  failed attempt and a later outcome. Keeping the restriction is proposed decision D17,
-  not yet decided. Future retry support of either kind needs explicit attempt and output
-  identities and a defined accounting policy (protocol, section 6.8).
+  failed attempt and a later outcome. The operator approved keeping the restriction on
+  2026-10-28 (D17), scoped to `pc-eer/0.3` and this feasibility protocol. Future retry
+  support of either kind needs explicit attempt and output identities and a defined
+  accounting policy (protocol, section 6.8).
 - **Semantic duplication of disagreements.** Two disagreements over the same positions are
   allowed when their scopes name distinct issues (D15). Whether two scopes name the same
   issue is left to human review: REA §7.3 makes only exact identifier collisions

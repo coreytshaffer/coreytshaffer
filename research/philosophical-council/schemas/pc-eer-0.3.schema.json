@@ -384,7 +384,7 @@
           }
         },
         "transport_failures": {
-          "description": "Calls that ended without a completed output, so no output exists. Recorded separately from invalid outputs: at most one entry per reviewer, whose output_sha256 is no_output (V4). pc-eer/0.3 has no attempt or output identities, so it cannot record a call sent again after a transport failure (protocol section 6.8, proposed decision D17).",
+          "description": "Calls that ended without a completed output, so no output exists. Recorded separately from invalid outputs: at most one entry per reviewer, whose output_sha256 is no_output (V4). pc-eer/0.3 has no attempt or output identities, so it cannot record a call sent again after a transport failure. D17, approved by the operator on 2026-10-28, keeps transport re-sends unsupported in pc-eer/0.3 and this feasibility protocol (protocol section 6.8).",
           "type": "array",
           "items": {
             "type": "object",
