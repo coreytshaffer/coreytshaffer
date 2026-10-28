@@ -1,0 +1,112 @@
+{
+  "record_format": "pc-eer/0.3-proposed",
+  "record_id": "pc-eer-example-toy-01-outcomes",
+  "record_status": "illustrative_example",
+  "created_at": "2026-10-28T00:00:00Z",
+  "non_claims": {
+    "truth": "not_assessed",
+    "safety": "not_assessed",
+    "intent": "not_assessed",
+    "authority": "none",
+    "representation": "none"
+  },
+  "study_context": "not_applicable",
+  "packet": {
+    "case_id": "PC-TOY-01",
+    "path": "examples/PC-TOY-01.case.json",
+    "sha256": "50bff41721b7dfa77b2686ec11da34e86d4cab888af936f15434b1923b091649"
+  },
+  "lineage": {
+    "declared": [
+      { "source_id": "S1", "derived_from": [], "declared_roots": ["S1"] }
+    ],
+    "transformations": []
+  },
+  "reviewers": [
+    {
+      "reviewer_id": "r1",
+      "kind": "illustrative_placeholder",
+      "procedure": "generic",
+      "model": "not_applicable",
+      "independence_class": "context_isolated_model_shared",
+      "packet_sha256": "50bff41721b7dfa77b2686ec11da34e86d4cab888af936f15434b1923b091649",
+      "prompt_sha256": "not_applicable",
+      "output_sha256": "not_applicable",
+      "budget": { "max_output_tokens": "not_applicable", "used_output_tokens": "not_applicable", "used_input_tokens": "not_applicable" },
+      "submitted_before_synthesis": true
+    },
+    {
+      "reviewer_id": "r2",
+      "kind": "illustrative_placeholder",
+      "procedure": "generic",
+      "model": "not_applicable",
+      "independence_class": "context_isolated_model_shared",
+      "packet_sha256": "50bff41721b7dfa77b2686ec11da34e86d4cab888af936f15434b1923b091649",
+      "prompt_sha256": "not_applicable",
+      "output_sha256": "not_applicable",
+      "budget": { "max_output_tokens": "not_applicable", "used_output_tokens": "not_applicable", "used_input_tokens": "not_applicable" },
+      "submitted_before_synthesis": true
+    },
+    {
+      "reviewer_id": "r3",
+      "kind": "illustrative_placeholder",
+      "procedure": "generic",
+      "model": "not_applicable",
+      "independence_class": "context_isolated_model_shared",
+      "packet_sha256": "50bff41721b7dfa77b2686ec11da34e86d4cab888af936f15434b1923b091649",
+      "prompt_sha256": "not_applicable",
+      "output_sha256": "no_output",
+      "budget": { "max_output_tokens": "not_applicable", "used_output_tokens": "not_applicable", "used_input_tokens": "not_applicable" },
+      "submitted_before_synthesis": true
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "f1",
+      "reviewer_id": "r1",
+      "segments": ["A3", "S1.2"],
+      "quotations": [
+        { "segment_id": "A3", "quote": "Since most people prefer B, B is better.", "source_verification": "source_linked" },
+        { "segment_id": "S1.2", "quote": "Respondents were not asked about cost or maintenance.", "source_verification": "source_linked" }
+      ],
+      "interpretation": "A3 moves from what respondents prefer to which option is better. The survey did not cover cost or maintenance, so it supports only the narrower claim that most respondents prefer B.",
+      "severity": "material",
+      "reported_confidence_pct": 80,
+      "verification_requests": []
+    }
+  ],
+  "reviewer_assessments": [
+    {
+      "reviewer_id": "r1",
+      "support_assessment": "supported_at_reduced_strength_or_scope",
+      "reported_confidence_pct": 75,
+      "rationale": "The evidence supports 'most respondents prefer B', not 'B is the better choice'."
+    }
+  ],
+  "synthesis": {
+    "method": "mechanical_union",
+    "positions": [
+      { "position_id": "p1", "support_assessment": "supported_at_reduced_strength_or_scope", "held_by": ["r1"] }
+    ],
+    "unresolved_disagreements": [],
+    "segment_attention": [
+      { "segment_id": "A3", "reviewer_ids": ["r1"], "independence_classes": ["context_isolated_model_shared"] },
+      { "segment_id": "S1.2", "reviewer_ids": ["r1"], "independence_classes": ["context_isolated_model_shared"] }
+    ],
+    "agreement_is_not_corroboration": true,
+    "dropped_positions": [],
+    "synthesized_confidence": "not_aggregated"
+  },
+  "integrity": {
+    "packet_hash_consistent": true,
+    "quotation_mismatch_finding_ids": [],
+    "unverified_quotation_finding_ids": [],
+    "unknown_segment_finding_ids": [],
+    "invalid_reviewer_outputs": [
+      { "reviewer_id": "r2", "reason": "The completed output did not parse as JSON." }
+    ],
+    "transport_failures": [
+      { "reviewer_id": "r3", "kind": "timeout", "reason": "No response within the time limit; no output was returned." }
+    ]
+  }
+}

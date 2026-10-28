@@ -1,6 +1,6 @@
 # Epistemic Evaluation Record — `pc-eer/0.3` (proposed)
 
-**Status: proposed planning artifact, revision r3 (2026-10-28).**
+**Status: proposed planning artifact, revision r4 (2026-10-28).**
 
 - Not accepted, and not used in any run.
 - Supersedes `pc-eer/0.2` (r1 and r2, last at commit `69d8739`) and `pc-eer/0.1` (r0,
@@ -9,6 +9,9 @@
   states its `scope`. `integrity` gains `transport_failures`, and a call that produced no
   output has `output_sha256` `no_output`. V3 and V4 change accordingly (section 6). A
   second illustrative record, over a packet with a transformation, is in `examples/`.
+- r4 separates the transport re-send restriction (proposed decision D17) from D16, and
+  adds a third illustrative record in which each reviewer outcome occurs. The format and
+  rules are unchanged from r3.
 - r2 tightened V3 and V7–V11 and added `duplicate_of` to the scoring record (section 7.1).
 - The structural schema is [`schemas/pc-eer-0.3.schema.json`](schemas/pc-eer-0.3.schema.json).
 - The semantic rules in section 6 are implemented in
@@ -259,10 +262,12 @@ R2-D2):
 
 The validator also checks the fixtures, the schemas themselves and the pins; see the
 [validation README](validation/README.md). What a pass does and does not establish is
-stated there and in section 2. Only two illustrative records exist today, so V13 reports
-"not applicable". Its negative control turns the first example into a study record to show
-that V13 fires. The second example's packet contains a transformation, so V11 has a record
-that passes and controls that must fail (NC-V11b, NC-V11c).
+stated there and in section 2. Only three illustrative records exist today, so V13
+reports "not applicable". Its negative control turns the first example into a study record
+to show that V13 fires. The second example's packet contains a transformation, so V11 has
+a record that passes and controls that must fail (NC-V11b, NC-V11c). In the third, each
+reviewer outcome occurs once: an assessment, an invalid output, and a transport failure
+with `no_output` (NC-V4d).
 
 ## 7. Scoring, discrepancies and adjudication
 
@@ -413,9 +418,12 @@ free text:
 - **Integrity.** There are no signatures or attestation. Hashes establish byte identity
   only, and nothing here is tamper-proof (REA §18).
 - **Revision.** Argument revision and sycophancy dynamics are not modelled.
-- **Retries.** The feasibility protocol has none (protocol, section 6.8; D16). A retry
-  policy, for transport failures or for content, would first need explicit attempt and
-  output identities, so that each attempt is a distinguishable trial.
+- **Retries.** Retries based on an output's content are prohibited (D16, decided).
+  Sending a call again after a transport failure is unsupported in `pc-eer/0.3`. That is a
+  format limitation: with no attempt or output identities, a record cannot keep both the
+  failed attempt and a later outcome. Keeping the restriction is proposed decision D17,
+  not yet decided. Future retry support of either kind needs explicit attempt and output
+  identities and a defined accounting policy (protocol, section 6.8).
 - **Semantic duplication of disagreements.** Two disagreements over the same positions are
   allowed when their scopes name distinct issues (D15). Whether two scopes name the same
   issue is left to human review: REA §7.3 makes only exact identifier collisions

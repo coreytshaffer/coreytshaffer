@@ -1,6 +1,6 @@
 # Validation — `pc-validate 0.4`
 
-**Status: proposed planning tooling, committed in revision r1 and revised in r2 and r3.** It checks the
+**Status: proposed planning tooling, committed in revision r1 and revised in r2–r4.** It checks the
 planning documents and data in this directory. It is not, and does not test, any council
 implementation. Nothing runs it automatically: there is no CI.
 
@@ -85,8 +85,11 @@ run, the r1 rules missed every control below and the r2 rules detected each one.
   `independent_spot_check` and appends a correct entry after it. Both are `exact`: each
   fires V11 and the pin check on the edited example, and nothing else. The r1 rules miss
   both.
-- **Invalid outputs (r3, decision D16).** A reviewer has exactly one outcome, so an invalid
-  output listed twice fails V4 (NC-V4b). The r1 and r2 rules miss it.
+- **Reviewer outcomes (r3 and r4, decision D16).** A reviewer has exactly one outcome, so
+  an invalid output listed twice fails V4 (NC-V4b); the r1 and r2 rules miss it. The third
+  example, `examples/pc-eer-illustrative-03.json`, is a valid record containing an
+  assessment, an invalid output and a transport failure with `no_output`. NC-V4d gives
+  its transport-failed reviewer an output-hash value other than `no_output`.
 - **Allowed on purpose.** Two disagreements with different IDs over the same positions,
   since the same positions can conflict over distinct issues (decision D15). Each must
   state its scope; whether two scopes name the same issue is left to human review.
@@ -125,7 +128,7 @@ run, the r1 rules missed every control below and the r2 rules detected each one.
 `fixtures/SHA256SUMS` commits to the following bytes:
 
 - the six case packets and six answer keys;
-- every file in `examples/`: the two toy packets and the two illustrative records;
+- every file in `examples/`: the two toy packets and the three illustrative records;
 - the index;
 - the documents named in `index.json` under `pinned_documents`. These are the protocol,
   the record design, the three schemas, and this directory's validator and controls.

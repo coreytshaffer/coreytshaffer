@@ -297,6 +297,13 @@
       "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/integrity/transport_failures", "value": { "reviewer_id": "r1", "kind": "timeout", "reason": "No response within the time limit." } }]
     },
     {
+      "id": "NC-V4d",
+      "description": "A reviewer recorded as a transport failure whose output hash is not no_output, as if an output existed.",
+      "expect": ["V4", "PIN01"],
+      "exact": true,
+      "ops": [{ "op": "json_set", "path": "examples/pc-eer-illustrative-03.json", "pointer": "/reviewers/2/output_sha256", "value": "not_applicable" }]
+    },
+    {
       "id": "NC-V5",
       "description": "A fabricated quotation still marked source_linked.",
       "expect": ["V5"],
