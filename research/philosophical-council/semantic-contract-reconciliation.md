@@ -1,278 +1,301 @@
-# Semantic-Contract Reconciliation — Philosophical Council, TriageCore and agent-control-evals (r0)
+# Semantic-Contract Reconciliation — Philosophical Council, TriageCore, REA v0.1 and agent-control-evals (r1)
 
-**Status: proposed planning artifact, revision r0 (2026-10-27).** This is a read-only
+**Status: proposed planning artifact, revision r1 (2026-10-28).** This is a read-only
 reconciliation and it changes nothing in TriageCore (TC) or agent-control-evals (ACE). It
-is not reviewed and not accepted, and it grants no authority. Section 10 records the
-no-change check.
+is not reviewed and not accepted, and it grants no authority. It supersedes r0 (commit
+`ea9ecbd`), which remains addressable in history. Section 10 records the no-change check.
 
 ## 1. Scope, inputs and method
 
-**Question.** Which TC and ACE research semantics can the council reuse, narrow or leave
-behind, and where must it define terms of its own? A second constraint governs the whole
-answer: none of TC's action-governance responsibilities may come with them.
+**Question.** Which existing research semantics can the council reuse, narrow or leave
+behind, and where must it define terms of its own? The constraint is unchanged from r0:
+none of TC's action-governance responsibilities may come with them.
 
-**Pinned inputs.** Citations below are `path:line` at these commits. Appendix A gives the
-SHA-256 of every cited file.
+**Three sources of meaning,** kept apart throughout:
 
-| Repository | Commit | Commit date |
+- **TC repository (inspected).** What TriageCore's documents and code say at the pinned
+  commit. This is the "inspected TriageCore implementation". Most of the relevant meaning
+  is documentary; where it lives in code, the code is cited.
+- **REA v0.1 Stage B (external research definition).** The operator supplied *Research
+  Evidence Architecture & Schema Contract v0.1*, Stage B revision, on 2026-10-27.
+  - It describes itself as "a user-facing design artifact outside the TriageCore
+    repository".
+  - Its status line records that storage-neutral semantic closure passed.
+  - It also records that carrier-specific encoding is not validated, design freeze is
+    "no", and there is no implementation or integration authority.
+
+  It therefore *defines* record semantics. It does not describe anything TriageCore
+  implements.
+- **Council usage.** What this directory means by a term, as revised in r1.
+
+**Pinned inputs.** Citations are `path:line` at these commits, or REA section numbers.
+Appendix A gives file hashes.
+
+| Input | Identity | Notes |
 |---|---|---|
-| `coreytshaffer/TriageCore` | `4e9f238512eec4d9fc417542745962783d3e675f` | 2026-10-26 |
-| `coreytshaffer/agent-control-evals` | `b876a287fc27701e79f16208640f86845f1edafc` | 2026-10-17 |
-| `coreytshaffer/triagecore-signed-intent` | `85c44709cbaf64fa06d7e81c8c1ed52ffbedabcf` (searched for the REA contract only) | 2026-10-25 |
-| this repository, base | `78371f0e3ae026aa59ce5b4deef07e582db880b6` | 2026-10-24 |
+| `coreytshaffer/TriageCore` | `4e9f238512eec4d9fc417542745962783d3e675f` (2026-10-26) | Inspected |
+| `coreytshaffer/agent-control-evals` | `b876a287fc27701e79f16208640f86845f1edafc` (2026-10-17) | Inspected |
+| `coreytshaffer/triagecore-signed-intent` | `85c44709cbaf64fa06d7e81c8c1ed52ffbedabcf` (2026-10-25) | Searched for the REA contract in r0; not found |
+| REA v0.1, Stage B | Operator file received as `research-evidence-architecture-schema-contract-v0.11.md`; SHA-256 `a0ece23a770d603e4220bc0847cdf02fdbb96e640022d46d8794ac4391f733e3`; 1,401 lines; drafted 2026-08-14 | See the provenance notes below |
+| this repository, r0 | `ea9ecbd9ccf00dd8712cc029d29e5d97d7a06d63` | Superseded by this revision |
 
-**Method.** Shallow clones were made, and nothing was written to them. Terms were located
-with `grep` and then read in context.
+**REA provenance notes.**
 
-**Search for the REA contract.** The operator's research summary names a *Research
-Evidence Architecture & Schema Contract v0.1* (Stage B). The search for it covered:
+- **Which copy.** The operator identifies this file as the "(1)" copy, the Stage B
+  revision. The Stage A copy was not supplied to this session and is not used.
+- **Its TC pin.** REA's own evidence pin into TC is
+  `codex/agents-governance-separation@8cff76d370b88dfbed8180844112c08ef6260a40`. On
+  2026-10-27 no remote branch or ref pointed at that commit. REA section 25 records a local
+  checkout, so the pin was not inspected.
+- **Not stored here.** The file is not stored in this repository.
 
-- TC `main`;
-- two TC branches, `ccr-a93d18f0-7tyn4t` and `feature/specialized-council-handoffs`;
-- the titles and bodies of TC and ACE pull requests;
-- `triagecore-signed-intent`.
+**Method.**
 
-**Not inspected:**
-
-- TC's other branches (there are 142 heads in all);
-- artifacts kept outside any repository.
-
-The contract was found in none of the searched places. That is not evidence that it is
-absent elsewhere. TC's backlog already treats one operator plan as "an off-repository
-planning artifact" (`docs/current_backlog.md:310`), and this contract may be the same kind
-of thing.
+- TC and ACE were read from shallow clones, with nothing written to them, as in r0.
+- REA was read in full.
+- For each handoff term, the TC repository's usage and REA's definition were compared
+  separately, then reconciled with council usage.
 
 ## 2. Findings in brief
 
-1. **Most handoff terms already have TC semantics, but scattered.** They appear across
-   contracts and operations records, not in one vocabulary.
-   - *Formal definitions exist* for artifact identity, the claim taxonomy for model
-     reviews, the evaluation boundary, source verification for compressed context, and
-     contradiction (in the MCI contract).
-   - *Consistent practice exists, but no record type*, for hypothesis, interpretation,
-     reproduction and corroboration.
-2. **Adjudication has no definition** in the inspected TC or ACE sources. Its only
-   occurrence is "UNADJUDICATED BOUNDARY OBSERVATIONS"
-   (`docs/operations/privacy-propagation-2026-08-29.md:232`). The council defines it
-   locally (row 11).
-3. **The REA v0.1 Stage B contract was not available.** By the operator summary's account,
-   it is where the full separation lives: artifacts, observations, claims, hypotheses,
-   evaluations, interpretations, adjudications and decisions. Every row of section 3
-   therefore keeps an open REA column. Where the contract defines a term, it should take
-   precedence for TC-compatible meaning (SC-1).
-4. **Four homonyms need disambiguation.**
-   - *Claim*: an assertion, or a capability claim.
-   - *Council*: TC's `worker_council` runner, or this evaluation procedure.
-   - *Reproduction*: restatement, or independent re-derivation.
-   - *Observation*: an MCI runtime-effect record, or a quotation from a packet.
+1. **REA defines what TC only practices.** REA supplies formal definitions for every
+   handoff term. The TC repository practices most of them but defines few (r0's finding
+   stands).
+   - The council now aligns with REA's definitions.
+   - It claims **alignment, not conformance**. REA has no carrier encoding, no design
+     freeze and no implementation, so there is nothing to conform to mechanically.
+2. **Adjudication.**
+   - *REA:* "an explicit finding resolving or narrowing a discrepancy without deleting
+     predecessors" (REA §5.3), with an `AdjudicationPayload` (§7.12).
+   - *TC repository:* still no definition.
+   - *r0:* defined adjudication as a human scoring decision. That merged two REA roles,
+     scoring and adjudication, and borrowed decision language that REA keeps separate
+     (§7.13).
+   - *r1:* scoring is a separate activity. Adjudication resolves or narrows a recorded
+     discrepancy and preserves its predecessors.
+3. **Observation.**
+   - *REA:* "a bounded result directly observed through a stated method" (§5.3, §7.4).
+   - *r0:* narrowed "observation" to a critic's quotation.
+   - *r1:* a quotation is a citation, that is, a claim about what the packet says. The
+     validator's byte-exact check of it is the observation, and its result is recorded
+     with REA's source-verification values (§5.4).
+4. **Evaluation.**
+   - *REA:* reserves `evaluation` for assessing a hypothesis or theory under a declared
+     scheme (§5.3, §7.9).
+   - *Council:* the "epistemic evaluation record" takes its name from the handoff and uses
+     "evaluation" in the ordinary sense of critique. In REA terms its contents are
+     interpretations, observations, discrepancies and a derived analysis.
+   - The REA sense applies to the study's own hypotheses H1–H4, in the pilot, after
+     registration. Whether to rename the record is decision D13.
+5. **Confidence.**
+   - *REA:* confidence is `high`, `medium`, `low` or `unknown`, with a rationale. "A model's
+     self-reported confidence MUST NOT promote source verification, reproduction state, or
+     evidence strength" (§6).
+   - *r1:* the critics' 0–100 number is renamed `reported_confidence_pct`. It is a measured
+     self-report, never REA confidence, and it promotes nothing.
+6. **Absence.**
+   - *REA:* has no universal null. `Missing`, `Unknown`, `Redacted` and `NotApplicable` are
+     distinct, and optional absence is omission (§4, §9.2, decision DD-RE-006,
+     counterexample 24).
+   - *r0:* used `null` for several different absences.
+   - *r1:* removes `null` from every council schema.
+7. **Homonyms.** Six now, against r0's four.
+   - From r0: *claim*, *council*, *reproduction*, *observation*.
+   - New in r1: *evaluation* (finding 4) and *adjudication* (finding 2).
+8. **Two layers stay separate.**
+   - TC declines knowledge-specific primitives
+     (`governed-knowledge-substrate.md:163`).
+   - REA keeps the research substrate apart from TC's operational evidence schema:
+     "This contract does not silently replace it" (§19).
 
-   Section 3 resolves each.
-5. **TC already declines knowledge-specific primitives.** It refuses to add
-   `KnowledgeClaim`, `TrustLevel`, `EpistemicAuthority`, `MemoryCapability` or
-   `KnowledgeSource` on the strength of an external candidate
-   (`docs/research/candidates/governed-knowledge-substrate.md:163`). The council's
-   epistemic vocabulary (standing, independence class, support assessment) therefore stays
-   outside TC (SC-7).
-6. **ACE's oracle-independence practices transfer, but co-locating the oracle does not.**
-   ACE stores the scored oracle inside the scenario file
-   (`schemas/scenario_fixture.schema.json:5`). That suits deterministic producers, but
-   model critics would read it. The council keeps answer keys in separate files (section
-   6).
+   Council records are research records. They are neither TC operational records nor TC
+   primitives.
+9. **ACE.** The divergences stand (section 6).
 
 ## 3. Term-by-term reconciliation
 
-*Status* describes the inspected sources only:
-
-- **defined**: a contract or protocol states the meaning;
-- **practiced**: the meaning is used consistently, with no record type;
-- **absent**.
-
-| # | Term | TC / ACE expression | Status | Council treatment | REA v0.1 Stage B |
-|---|---|---|---|---|---|
-| 1 | Artifact identity | A mutable tag "must not stand in for an immutable artifact identity" (`docs/research/candidates/nemotron-3.5-lightning-governed-execution-specialist.md:39`). Aliases without artifact identity are not identity (`docs/security/runtime_integrity_model_provenance_policy.md:157`). Hashes "establish byte identity only" (`docs/operations/local-heavy-diagnostic-2026-08-07.md:248`). Commitments "are not signatures or evidence of independent computation" (`docs/research/monitoring-coverage-contract-v0.1.md:684`). | defined | **Reuse.** Packets, prompts and outputs are identified by the SHA-256 of their exact bytes. A model is identified by its exact version; aliases are labels only (`model.alias_labels`). A hash establishes byte identity, nothing more. | open |
-| 2 | Observation | MCI `kind=observation` is a witness record of a runtime effect boundary (`monitoring-coverage-contract-v0.1.md:149`). Operations records keep what TC received apart from what a backend did (`local-heavy-diagnostic-2026-08-07.md:181`), and keep source-confirmed apart from runtime-observed (`:215`). | defined (MCI), practiced | **Narrow.** A council observation is an exact quotation from a packet segment, checkable against bytes (record V5). MCI observation records are not imported. | open |
-| 3 | Claim | *Assertion sense:* the review-protocol taxonomy `context-supported`, `uncertain-inference`, `unsupported`, `authorized-next-action` (`docs/evals/evidence_bound_review_protocol.md:33-36`); "Cite or downgrade" (`:40`); "Confidence is not evidence" (`:43`). *Capability sense:* `claim` appears in TC's existing-vocabulary list (`governed-knowledge-substrate.md:142`) and is a lifecycle state, "issued -> claimed -> completed" (`triage_core/capability_claims.py:19`). | defined (both senses) | **Reuse the assertion sense only.** Proposed correspondence, not adopted: `context-supported` ≈ a finding with a verified quotation; `uncertain-inference` ≈ an interpretation held at lower confidence; `unsupported` ≈ adjudicated `unsupported`. Adopt "cite or downgrade" and "confidence is not evidence" as adjudication rules. **Do not import** `authorized-next-action` or the capability sense; both are action governance. | open |
-| 4 | Hypothesis | A statement "is a hypothesis to be tested, not an observation" (`governed-knowledge-substrate.md:45`). "A hypothesis that proved wrong, recorded rather than dropped" (`docs/operations/classifier-terminal-fallback-2026-08-29.md:216`). | practiced | **Reuse.** A hypothesis is a proposition put forward for testing. It is never recorded as an observation, and it is kept when refuted. `pc-eer/0.1` has no hypothesis field: critics' hypotheses stay in interpretation text (open question, section 9). | open |
-| 5 | Interpretation | "Scoring and score interpretation happen outside TriageCore" (`docs/research/eval_taxonomy.md:109`). Quality gates "qualify cost interpretations but never rewrite or rank them" (`docs/operations/control-plane-invariant-checklist.md:43`). Downstream synthesis must not collapse distinctions (`local-heavy-diagnostic-2026-08-07.md:215`). | practiced | **Define locally.** An interpretation is a reviewer's reading that rests on cited observations. It is stored only in `interpretation` and can never be recorded as an observation. | open |
-| 6 | Evaluation | TC "must treat evaluator findings as external artifacts" (`docs/evals/evaluation_handoff_contract.md:75`). "Evaluator output remains untrusted and externally interpreted" (`docs/evals/external_evaluator_adapter_contract.md:152`). `block` is reserved for cases that cannot be scored safely (`eval_taxonomy.md:51`). Evaluator independence is part of the governance kernel (`docs/architecture/triagecore_identity.md:45`). ACE: "Evaluator Scores Are Not Approvals" (`docs/evaluator_signal_model.md:48`). | defined (as a boundary) | **Reuse the boundary.** Council output is evaluation evidence for human judgment: it is external to TC and never an approval. Adopt the strictness of `block`: a run that cannot be scored deterministically fails closed and is not scored as a failure. | open |
-| 7 | Provenance | Canonical definition in this repository's `trust-vocabulary.md`. TC: provenance must not be "treated as a trust anchor without evidence" (`docs/research/triagecore_research_question.md:18`). | defined (canonical) | **Reuse the canonical definition.** Extend it with declared lineage and transformation records. Declared lineage is an assertion, not verified dependence. | open |
-| 8 | Source verification | Compressed summaries "do not replace source verification" (`docs/change/requests/CR-005-local-preflight-context-compression.md:19`; reminder at `triage_core/compression.py:118`). "A summary is not a substitute for original messages" (`monitoring-coverage-contract-v0.1.md:716`). A matching digest without access to the bytes does not satisfy review (`:714`). | defined (compressed context) | **Reuse and generalize.** A transformed view never replaces checking its source. Transformations carry `fidelity_check`, and fidelity reported by the transformation's own producer is not verification. | open |
-| 9 | Reproduction | The reproducibility standard (`triagecore_research_question.md:108`). A second reader derives expectations "without using a future reconciler's output as the oracle" (`monitoring-coverage-contract-v0.1.md:731`). "A reviewer can reproduce them rather than trust this record" (`docs/change/requests/CR-134-public-export-admission-contract.md:215`). A reproduction record (`docs/operations/monitoring-coverage-baseline-2026-10-22.md:119`). | practiced | **Define locally, with two senses (SC-8).** *Restatement* (copying or repeating) adds no standing. *Reproduction* is independent re-derivation by a distinct method, witness and traceable record. Only a reproduction can add standing, and only as a separate evidence item. | open |
-| 10 | Contradiction | Conflicts in source sequences or record IDs "are integrity failures, not competing opinions" (`monitoring-coverage-contract-v0.1.md:237`). "Do not choose a favorable branch" (`:408`). Contradictory evidence "remains visible and does not become optimistic permission" (`triagecore_identity.md:78`). | defined (MCI), principle | **Reuse the distinction.** Records that are inconsistent with each other are an `integrity_conflict`, an integrity finding rather than an opinion. Competing assessments are retained positions. Neither is resolved by picking a favorable branch. | open |
-| 11 | Adjudication | No definition. The only occurrence is "UNADJUDICATED BOUNDARY OBSERVATIONS" (`privacy-propagation-2026-08-29.md:232`), with open lanes "MARKED not decided" (`:262`). Related practice: decide the cause before accepting a lesson (`docs/verification_guide.md:128`). ACE: mismatches are aligned explicitly, and neither side is patched to appease the other (`docs/oracle_alignment_findings.md:20-22`). | **absent** | **Define locally.** Adjudication is a recorded human decision about how a study output is scored against independently specified expectations. It is a separate record that confers no authority, and contested items stay contested (record design, section 7). No TC change is proposed. | open; likely defined there |
-| 12 | Corroboration | Distinguish the basis for a conclusion from corroborating evidence (`docs/operations/privacy-declaration-evidence-join-2026-08-29.md:45`). "Agreement between two producers is insufficient" (`monitoring-coverage-contract-v0.1.md:711`). "Only an exact retransmission of the original producer record is idempotent" (`:202`): a repeat adds nothing. | practiced | **Reuse.** Corroboration requires a dependence analysis. Agreement among reviewers is recorded as attention, never as corroboration (record constant). | open |
-| 13 | Decision and authority | `Approved` status alone does not authorize (`docs/change/requests/CR-130-approved-status-authority-semantics.md:43`). "Proposed != Authorized != Implemented" (`AGENTS.md:23`). Agent verdicts are not authority (`AGENTS.md:51`). Observation, recommendation, authorization, execution and evaluation "do not silently confer authority on one another" (`triagecore_identity.md:75`). | defined | **Do not import** decision semantics. Council records contain no decisions. The council does adopt the *negative* constraint: its outputs confer no authority (SC-3). | open (REA lists decisions) |
-| 14 | "Council" | TC's `worker_council` is an execution runner (`triage_core/orchestration.py:82`, `triage_core/context_budget.py:27`) with a role taxonomy `2026-06-worker-council-v2` (`triage_core/task_ledger.py:21`). | defined (different meaning) | **Keep distinct (SC-6).** Use the `pc-` prefix for every identifier. Never use a bare `council` as a runner, role or event name. Never register the council as a TC runner. | n/a |
+| # | Term | TC repository (inspected) | REA v0.1 Stage B | Council treatment (r1) |
+|---|---|---|---|---|
+| 1 | Artifact identity | A mutable tag must not stand in for artifact identity (`docs/research/candidates/nemotron-3.5-lightning-governed-execution-specialist.md:39`; `docs/security/runtime_integrity_model_provenance_policy.md:157`). "Hashes establish byte identity only" (`docs/operations/local-heavy-diagnostic-2026-08-07.md:248`). | `Artifact` (§7.1): a content hash "identifies the preserved bytes, not their meaning or authenticity". A changed copy is a new artifact linked to its parent. "A digest never grants retrieval or disclosure permission" (decision DD-RE-004). | **Align.** Packets, critic outputs and prompts are artifacts identified by SHA-256 of their exact bytes. A model is identified by its exact version; aliases are labels only. |
+| 2 | Activity, trial, experiment | Study and run labels separate exploratory runs from studies (`docs/evidence_schema.md:26-27`). | `Activity` (§7.2). A trial is "an execution attempt under an identified configuration and task snapshot". An experiment adds registered hypotheses, protocol, controls and stopping rules (§14). | **Align.** A critic call is a trial. The feasibility study is an investigation made of trials, not an experiment. The pilot is an experiment: it needs registrations and stopping rules (protocol sections 10–11). |
+| 3 | Observation | MCI `kind=observation` records runtime effects (`monitoring-coverage-contract-v0.1.md:149`). Operations records keep what TC received apart from what a backend did (`local-heavy-diagnostic-2026-08-07.md:181`). | "A bounded result directly observed through a stated method" (§5.3), with a typed value (§7.4). | **Corrected from r0.** A critic's quotation is a citation, and the validator's byte-exact substring check is the observation. MCI records are not imported. |
+| 4 | Claim | *Assertion sense:* the review-protocol taxonomy (`docs/evals/evidence_bound_review_protocol.md:33-36`). *Capability sense:* "issued -> claimed -> completed" (`triage_core/capability_claims.py:19`). | An atomic asserted proposition with supporting and opposing records (§7.5). | **Align, assertion sense only.** The subject's conclusions, a critic's quotations, and an answer key's planted items are claims. The capability sense is action governance and is not imported. |
+| 5 | Hypothesis and registration | "A hypothesis to be tested, not an observation" (`governed-knowledge-substrate.md:45`). Wrong hypotheses are "recorded rather than dropped" (`docs/operations/classifier-terminal-fallback-2026-08-29.md:216`). | `HypothesisPayload` requires a scope, predicted pattern, primary outcome, falsification criterion and evaluation method (§7.6). `HypothesisRegistration` is separate and records outcome-access state (§7.7). | **Align.** H1–H4 are restated in this form, with provisional criteria (protocol section 2), and are registered before the pilot. Feasibility creates no evaluation of them. |
+| 6 | Theory | No definition. | A scoped explanatory structure; a failed prediction does not automatically falsify it (§7.8, §5.7). | **Not used.** The study proposes no theory. |
+| 7 | Evaluation | Scoring and interpretation happen outside TC (`docs/research/eval_taxonomy.md:109`). Evaluator output is untrusted and externally interpreted (`docs/evals/external_evaluator_adapter_contract.md:152`). | "A bounded assessment of an identified hypothesis or theory under a declared evaluation scheme" (§5.3, §7.9). With no qualifying evaluation there is no record; an `untested` record is not created (§5.7). | **Homonym (D13).** The record's name keeps the ordinary sense. In the REA sense, only H1–H4 are evaluated, in the pilot. TC's boundary still applies: council output is external evidence and never an approval. |
+| 8 | Interpretation | Practiced, not defined (`eval_taxonomy.md:109`; `docs/operations/control-plane-invariant-checklist.md:43`). | "A reasoned reading derived from observations or claims" (§5.3). It "MUST NOT be stored as an observation merely because it is strongly supported" (§7.10). | **Align.** Findings and overall support assessments are interpretations derived from cited segments. |
+| 9 | Discrepancy | MCI integrity findings (`monitoring-coverage-contract-v0.1.md:237`). Lanes "MARKED not decided" (`docs/operations/privacy-propagation-2026-08-29.md:262`). | A first-class "conflict, missing link, ambiguity, or verification failure", with kind, classification and status. Competing records stay accessible (§7.11). | **Align.** Disagreements between critics are open discrepancies inside a record. Conflicts between scorers, between a critic and the answer key, or between an author and a second reader are separate discrepancy records (record design, section 7). |
+| 10 | Adjudication | **Absent.** One occurrence: "UNADJUDICATED BOUNDARY OBSERVATIONS" (`privacy-propagation-2026-08-29.md:232`). | "An explicit finding resolving or narrowing a discrepancy without deleting predecessors" (§5.3). It must not mutate or delete what it evaluates, and may designate records usable "for a named analysis" (§7.12). | **Adopt REA; corrects r0.** Scoring is not adjudication. Adjudication acts only on recorded discrepancies, and its scope is a named analysis (section 9, question 2). |
+| 11 | Decision and authority | `Approved` status alone does not authorize (`docs/change/requests/CR-130-approved-status-authority-semantics.md:43`). "Proposed != Authorized != Implemented" (`AGENTS.md:23`). TC's operational schema records `review_decision` and `supervisor_decision` (`docs/evidence_schema.md`). | A human or governed choice with rationale, scope, conditions and expiration. "Recording a decision does not prove the decision maker had authority" (§7.13). "LedgerRecorded != Authorized" (§4). | **Do not import decision semantics into records.** The operator's decisions D1–D14 are REA-style decisions, recorded outside council records with scope, conditions and expiration. |
+| 12 | Provenance | Must not be "treated as a trust anchor without evidence" (`docs/research/triagecore_research_question.md:18`). | Artifact provenance "MUST NOT determine whether a statement is an observation, claim, or interpretation" (§5.1). Role comes only from an explicit discriminator (§4). | **Align.** The canonical trust-vocabulary definition applies, plus REA's rule that role is never inferred from source, file name or container. |
+| 13 | Source verification | Compressed summaries "do not replace source verification" (`docs/change/requests/CR-005-local-preflight-context-compression.md:19`). | `unverified`, `source_linked`, `source_mismatch`, `not_verifiable` or `unknown`. `source_linked` means the source supports the bounded record, "not ... that the source is correct about the world" (§5.4). | **Align.** Quotations use `source_linked`, `source_mismatch` or `unverified`. A transformation's self-reported fidelity is not verification. |
+| 14 | Reproduction | Reproducibility standard (`triagecore_research_question.md:108`). A second reader derives expectations "without using a future reconciler's output as the oracle" (`monitoring-coverage-contract-v0.1.md:731`). | Requires a qualifying independent activity with recorded environment, inputs, method and output. "Repeating a report's text is not reproduction." `failed_to_reproduce` is never used for absence (§5.5). Quoted historical results remain `not_attempted` (§13). | **Align.** Answer keys carry `reproduction_state: not_attempted` until a second reader re-derives them. Replicate runs are repeated trials with the same method, not independent reproduction. Validator runs at a recorded commit reproduce the semantic checks. |
+| 15 | Conflict and current use (contradiction) | Integrity failures "are ... not competing opinions" (`monitoring-coverage-contract-v0.1.md:237`). "Do not choose a favorable branch" (`:408`). | Conflict-state and current-use status are separate from verification and can be derived from discrepancy, adjudication and supersession records. "Contradicted != Deleted"; "Superseded != Erased" (§4, §5.6). | **Align.** An integrity conflict is not an opinion. Superseded revisions remain addressable in history: r0 is at `ea9ecbd`. |
+| 16 | Corroboration | Basis versus corroborating evidence (`docs/operations/privacy-declaration-evidence-join-2026-08-29.md:45`). "Agreement between two producers is insufficient" (`monitoring-coverage-contract-v0.1.md:711`). | "SourceGrounding != IndependentReplication" (§4). Suspected semantic duplicates are preserved and linked, never silently merged (§7.3). | **Align.** Agreement is attention, never corroboration. Scorers' clustering of equivalent findings (M10) is a recorded judgment, not automatic detection. |
+| 17 | Confidence | Not defined as a record field. | `high`, `medium`, `low` or `unknown`, with a rationale. `verified_fact` is forbidden, and self-reported model confidence promotes nothing (§6). | **Align.** Critic numbers are `reported_confidence_pct`, a measured variable for calibration (M6). Any confidence classification the council makes later uses REA's vocabulary. |
+| 18 | Absence | MCI writes absent facts as `null` (`monitoring-coverage-contract-v0.1.md:99`, `:311`). TC's operational schema uses `null` for "no validator" (`docs/evidence_schema.md:54`). | No universal null. Distinct tags are allowed "only by field contract", and optional absence is omission (§9.2, DD-RE-006). | **Align with REA; corrects r0.** Council schemas contain no `null`. Each field names the tags it allows (`not_applicable`, `unknown`), or the field is omitted. |
+| 19 | Derived analysis | Scoring and score interpretation happen outside TC (`eval_taxonomy.md:109`). | Regenerable from declared inputs, and never canonical evidence (§12). The rebuild criterion is §11.1. | **Align.** Mechanical synthesis, measures M1–M12 and validator reports are derived and regenerable. Validation is committed (`validation/`) so the checks can be rebuilt. |
+| 20 | "Council" | `worker_council` is an execution runner (`triage_core/orchestration.py:82`; `triage_core/task_ledger.py:21`), and `council` is a `runner` value (`docs/evidence_schema.md:24`). | Not used. | **Keep distinct (SC-6).** Identifiers use the `pc-` prefix. |
 
 ## 4. The six invariants
 
-| Invariant | TC / ACE precedent | Council rule | Where enforced (proposed) | Development fixture |
-|---|---|---|---|---|
-| Evidence is not authority | Separation of functions (`triagecore_identity.md:75`); no verdict "is action permission" (`monitoring-coverage-contract-v0.1.md:223`); ACE: "The world can provide evidence. It cannot grant authority." (`docs/trust_boundary_eval_family.md:9`) | No decision vocabulary. `authority: none`. Authorization by an evaluator is an overreach marker. | record schema; adjudication | PC-F01 (subject infers that a review can stop) |
-| Interpretation is not observation | Source-confirmed and runtime-observed kept apart (`local-heavy-diagnostic-2026-08-07.md:215`); hypothesis not observation (`governed-knowledge-substrate.md:45`) | Observations are verified quotations; interpretation is a separate field. | record V5, V6 | all; PC-F02 (an interpretation in a briefing) |
-| Repetition is not independent corroboration | `monitoring-coverage-contract-v0.1.md:202`, `:711`; basis versus corroboration (`privacy-declaration-evidence-join-2026-08-29.md:45`) | Declared lineage projected to roots. `agreement_is_not_corroboration`. Error correlation measured. | record V9, V10; protocol M10 | PC-F02 |
-| Missing evidence is not negative evidence | "Absence in a corpus that predates the feature ... carries no information" (`privacy-declaration-evidence-join-2026-08-29.md:145`); an ambiguous timeout "is not proven nonexecution" (`monitoring-coverage-contract-v0.1.md:36`); an absent usage record shows what TC received (`local-heavy-diagnostic-2026-08-07.md:181`) | The support scale separates "not supported" from "undermined". An inference from absence must check whether the source could have recorded the event. | record vocabulary; operator O3 | PC-F03, and PC-F06 as its control |
-| Disagreement is not erased by synthesis | "Retain both verdicts, and flag behavioral disagreement for human assessment" (`monitoring-coverage-contract-v0.1.md:235-236`); "Recorded as open rather than resolved by inference" (`privacy-declaration-evidence-join-2026-08-29.md:173`); "deliberately not conflated" (`privacy-propagation-2026-08-29.md:240`) | Positions partition assessments. Dropped positions are listed with a justification. Unresolved disagreements are recorded. | record V7, V8; protocol M9 | PC-F04 |
-| A transformation cannot silently raise standing | `CR-005-local-preflight-context-compression.md:19`; byte identity "not semantic equivalence of a summary" (`monitoring-coverage-contract-v0.1.md:180`); "Child context is not a review of discarded parent context" (`docs/research/monitoring-coverage-fixture-spec-v0.1.md:170`); an exemption "cannot launder" a missed deadline (`monitoring-coverage-contract-v0.1.md:281-282`); ACE `memory_laundering_001`, `provenance_confusion_001` | Each transformation carries its ceiling sources and fidelity check. Effects are tied to findings. Self-reported fidelity is not verification. | record V11; operator O3 | PC-F05 |
+| Invariant | TC repository precedent | REA v0.1 counterpart | Council rule, and where it is checked |
+|---|---|---|---|
+| Evidence is not authority | No verdict "is action permission" (`monitoring-coverage-contract-v0.1.md:223`). Governance functions are separated (`docs/architecture/triagecore_identity.md:75`). ACE: "The world can provide evidence. It cannot grant authority." (`docs/trust_boundary_eval_family.md:9`) | "ResearchLedgerRecordsAuthorityEvidence != ResearchLedgerCreatesAuthority" (§1). "LedgerRecorded != Authorized" (§4). No record creates authorization by existing (§20, criterion 12). | No structured field expresses a decision or approval, and `non_claims.authority` is constant. **Free text is not constrained**: overreach in prose is scored by people (M7). Schema check: V0. |
+| Interpretation is not observation | Source-confirmed and runtime-observed kept apart (`local-heavy-diagnostic-2026-08-07.md:215`). | An interpretation is never stored as an observation (§7.10; counterexample 3). | Findings are interpretations. Quotations are claims checked against the packet. V5, V6. |
+| Repetition is not independent corroboration | `monitoring-coverage-contract-v0.1.md:202`, `:711` | "Repeating a report's text is not reproduction" (§5.5). "SourceGrounding != IndependentReplication" (§4). | Declared lineage is projected to roots. Agreement is constant non-corroboration, and confidence is not aggregated. V0, V9, V10. M10 measures correlated error. |
+| Missing evidence is not negative evidence | `privacy-declaration-evidence-join-2026-08-29.md:145`; an ambiguous timeout is "not proven nonexecution" (`monitoring-coverage-contract-v0.1.md:36`). | "Missing != Unknown != Redacted != NotApplicable"; "FailedReplication != AbsenceOfReplication"; "AbsenceOfEvaluation != EvaluationOutcome" (§4). | The support scale separates "not supported" from "undermined". No null. Feasibility creates no evaluation of H1–H4. Schema check, and the PC-F03/PC-F06 pair. |
+| Disagreement is not erased by synthesis | Retain both verdicts and flag the disagreement (`monitoring-coverage-contract-v0.1.md:235-236`). | "Contradicted != Deleted"; "Superseded != Erased" (§4). Competing records remain accessible after adjudication (§7.11), which may not delete (§7.12). | Positions partition assessments, disagreements stay open, and adjudication preserves both codings. V7, V8. |
+| A transformation cannot silently raise standing | `CR-005-local-preflight-context-compression.md:19`; "not semantic equivalence of a summary" (`monitoring-coverage-contract-v0.1.md:180`). | A converted copy is a new artifact (§7.1). Normalization changes the commitment (§8.3). Quoted results stay `not_attempted` (§13). | Transformations carry ceiling sources and their fidelity check. V11; FX11, FX18; PC-F05. |
 
 ## 5. Not imported: action-governance semantics
 
-The council takes none of the following. It holds no TC grant, and nothing in this
-directory is a TC change request.
+Unchanged from r0. The council does not take:
 
 - **Control-plane decision vocabularies.** TC's `allow`, `deny` and
   `require_human_approval` (`eval_taxonomy.md:41-43`), and ACE's `allow`, `block` and
   `observe`.
 - **The `authorized-next-action` category** (`evidence_bound_review_protocol.md:36`).
 - **TC's runtime authority machinery:**
-  - capability claiming and its lifecycle (`capability_claims.py`);
+  - capability claiming;
   - human authorization receipts;
   - admission evidence;
   - route decisions;
   - mediated execution;
   - MCI exemptions;
   - signed ledger events.
-- **The `worker_council` runner and its role taxonomy.**
-- **CR lifecycle grants.** Council documents may *describe* their own status using the
-  distinction "proposed, not authorized, not implemented". That is a status description,
-  not a grant.
+- **The `worker_council` runner.**
+- **CR lifecycle grants.**
+
+REA Baseline v0.1 excludes the same territory for itself: authorization enforcement,
+capability issuance or claiming, executor invocation and self-authorization (§21). The
+council inherits that exclusion. It also does not adopt REA's checkpoint-signing or
+tamper-evidence machinery, and it makes no tamper-proofing claim (§18).
 
 ## 6. Divergences from ACE, and what is adopted
 
+These are as in r0. One wording change: "adjudicators" become "scorers", following
+finding 2.
+
 **Diverges.**
 
-1. **Oracle location.** ACE's scored `expected_outcome` sits in the scenario file
-   (`schemas/scenario_fixture.schema.json:5`). Council answer keys sit in separate,
-   adjudicator-only files, because the critics are models and would read them.
-2. **Who assigns codes.** ACE expects the system under test to export stable reason codes
-   (`docs/reason_taxonomy.md:5`). Council critics write free text and adjudicators assign
-   codes. This keeps the defect taxonomy out of every prompt.
-3. **Trust model.** ACE trusts the producer to report honestly (`README.md:13`). The
-   council verifies critics' quotations mechanically, and treats their claims as
-   unverified until adjudicated.
-4. **Decisions.** ACE scores decisions. The council has none to score.
+1. **Oracle location.** ACE keeps the oracle in the scenario file
+   (`schemas/scenario_fixture.schema.json:5`). Council answer keys are scorer-only and
+   physically separate.
+2. **Who assigns codes.** ACE expects producers to export stable reason codes
+   (`docs/reason_taxonomy.md:5`). Council critics write free text, and scorers assign
+   codes.
+3. **Trust model.** ACE trusts producer self-report (`README.md:13`). The validator checks
+   critics' quotations.
+4. **Decisions.** ACE scores decisions; the council has none.
 
 **Adopted.**
 
-- An independent oracle: expectations are never derived from the system's internals
-  (`docs/reuse_manifest.md:10`).
-- Allow-side controls, "so an always-block system cannot score well" (`README.md:28`).
-  PC-F06 and the traps play this role.
-- Self-tests are not evidence: a mock mode "carries no information about any evaluated
-  system" (`README.md:53`). A council pipeline dry run with echoed outputs would likewise
-  be no evidence.
-- Evaluating the evaluator: "If any adversarial actual ever scores `match: true`, the
-  evaluator itself has regressed" (`docs/adversarial_actuals.md:5`). Drafting used negative
-  tests of the scratch checkers in the same spirit.
-- Oracle-alignment findings are recorded rather than patched away
-  (`oracle_alignment_findings.md:20-22`).
-- Stable codes are kept apart from diagnostic detail (`reason_taxonomy.md:5`).
+- An independent oracle (`docs/reuse_manifest.md:10`).
+- Allow-side controls (`README.md:28`).
+- Self-tests are not evidence (`README.md:53`).
+- Evaluating the evaluator (`docs/adversarial_actuals.md:5`). This is now a committed
+  practice: every validator rule has a negative control (`validation/`).
+- Oracle-alignment findings (`docs/oracle_alignment_findings.md:20-22`). These are now
+  expressed as REA discrepancies.
+- Stable codes kept apart from diagnostic detail (`reason_taxonomy.md:5`).
 
 ## 7. Semantic contract
 
 These are proposed normative statements for council artifacts. "Must" states proposed
-conformance for council work. It asserts nothing about TC or ACE.
+conformance for council work. It asserts nothing about TC, REA or ACE.
 
-- **SC-1, vocabulary precedence.**
-  - Shared terms use the canonical [trust vocabulary](../../trust-vocabulary.md).
-  - Where TC defines a term in section 3, the council uses that meaning or a stated
-    narrowing of it.
-  - Council-local definitions apply only where the inspected sources define nothing.
-  - When the REA v0.1 Stage B contract is supplied, its definitions take precedence for
-    TC-compatible meaning, and this document is revised.
-- **SC-2, no action governance.** Council artifacts must not emit or imply control-plane
-  decisions, approvals, exemptions, capability claims, admission evidence, routing or
-  signatures. This includes the `authorized-next-action` category.
-- **SC-3, evaluation is not authority.** No council output confers authority on anyone or
-  anything. Consumers treat outputs as evidence for human judgment. Every record carries
-  `non_claims.authority: none`.
-- **SC-4, external-artifact boundary.**
-  - Council records are external to TC.
-  - TC could ingest them only through a separately approved TC change request, as static
-    files across TC's file-based evaluation handoff boundary
-    (`evaluation_handoff_contract.md:75`).
-  - No runtime coupling and no code imports exist in either direction.
-- **SC-5, independent oracle.**
-  - Expectations are derived from case packets alone. They are never derived from council
-    outputs or from TC or ACE internals (`docs/reuse_manifest.md:10`;
-    `monitoring-coverage-fixture-spec-v0.1.md:17`).
-  - They are stored apart from critic-visible material.
-  - They become an oracle only after a human second reader re-derives them (protocol G1).
-- **SC-6, naming.**
-  - Council identifiers use the `pc-` prefix.
-  - A bare `council` is never a runner, role or event identifier.
-  - The council is not a TC runner.
-- **SC-7, no TC primitives.**
-  - Council epistemic terms (standing, independence class, support assessment, adjudication
-    codes) stay outside TC.
-  - The council proposes neither the primitives TC has declined
-    (`governed-knowledge-substrate.md:163`) nor equivalents.
-  - Any later proposal must first pass TC's existing-vocabulary test (`:131`) and rest on a
-    demonstrated semantic insufficiency (`:179`).
-- **SC-8, two senses of reproduction.**
-  - Restating or transforming a claim must not silently raise its standing.
-  - Additional verification needs a distinct method, witness and traceable record. This
-    wording follows the operator's research summary, section 9.
-- **SC-9, integrity is not opinion.**
-  - Inconsistent records are integrity findings (`monitoring-coverage-contract-v0.1.md:237`).
-  - Competing assessments are retained positions.
-  - Neither is settled by picking a favorable branch (`:408`).
-- **SC-10, status discipline.**
-  - Every council artifact states its status.
-  - No status value confers authority (`CR-130-approved-status-authority-semantics.md:43`).
-  - A council artifact may be proposed, accepted and implemented only through separate,
-    recorded operator decisions.
-- **SC-11, read-only toward TC and ACE.** Council work reads TC and ACE only as copies
-  pinned at a commit, and never writes to either.
+- **SC-1, vocabulary precedence** (revised in r1). Meanings come from these sources, in
+  this order:
+  1. the canonical [trust vocabulary](../../trust-vocabulary.md), for shared terms;
+  2. REA v0.1 Stage B, for epistemic roles and statuses, where it defines a term;
+  3. the TC repository's meaning, or a stated narrowing of it, where REA is silent;
+  4. a council-local definition, only where none of these defines the term.
+
+  This gives semantic alignment with REA, not conformance. Any REA revision triggers a
+  re-reconciliation.
+- **SC-2, no action governance.** Unchanged. This includes the `authorized-next-action`
+  category.
+- **SC-3, evaluation is not authority.** No council output confers authority. Every record
+  carries `non_claims.authority: none`. That constant constrains the record's metadata, not
+  its prose (SC-13).
+- **SC-4, external-artifact boundary.** Unchanged. TC could ingest a council record only
+  through a separately approved TC change request, as a static file across its evaluation
+  handoff boundary (`docs/evals/evaluation_handoff_contract.md:75`).
+- **SC-5, independent oracle.** Answer keys are derived from case packets alone. They
+  become an oracle only when a human second reader reproduces their derivation and
+  `reproduction_state` becomes `reproduced`.
+- **SC-6, naming.** Unchanged: the `pc-` prefix, and never a bare `council` identifier.
+- **SC-7, no TC primitives.** Unchanged. The council's epistemic terms stay outside TC.
+  Aligning with REA does not change that: REA is a research substrate, not a TC primitive,
+  and it carries no implementation authority.
+- **SC-8, reproduction** (revised in r1). Restating or transforming a claim adds no
+  standing. Reproduction requires a qualifying independent activity, with its environment,
+  inputs, method and output recorded (REA §5.5). A failed reproduction is never inferred
+  from absence.
+- **SC-9, integrity is not opinion.** Unchanged.
+- **SC-10, status discipline.** Unchanged. Revisions before any published checkpoint follow
+  REA's draft-regeneration rule (DD-RE-005): r0 is superseded, not erased.
+- **SC-11, read-only toward TC and ACE.** Unchanged.
+- **SC-12, explicit absence** (new). Council formats use no universal null. A field names
+  the absence tags its contract allows, or is omitted when optional. Missing, unknown,
+  redacted and not-applicable stay distinct.
+- **SC-13, guarantees match mechanisms** (new). Every claimed guarantee names its
+  mechanism: schema, validator rule, or human scoring. Nothing mechanical checks the
+  content of free text. A statement that the format "prevents" something applies only to
+  what that mechanism actually checks.
 
 ## 8. Layering
 
-Adapted from the operator's research summary, section 9.
-
-| Layer | Responsibility | Not a substitute for |
-|---|---|---|
-| Epistemic records (`pc-eer`, consistent with TC semantics) | What was observed, asserted, interpreted, contested and evaluated, with provenance | Truth |
-| Council critics | Bounded argument analysis and provisional assessments | Human or institutional decision authority |
-| Human adjudication | Scoring against independently specified expectations | Settling contested questions |
-| Technical validators (none in v0.1) | Reproducible checks against specified contracts and observables | Conceptual or ethical judgment |
-| TC action governance, only if ever separately authorized | Governing consequential operations on a named execution path | Isolation or safety assurance; council evaluation |
+| Layer | REA v0.1 (§3) | Council | Not a substitute for |
+|---|---|---|---|
+| Raw evidence | Immutable artifact bytes | Case packets and verbatim critic outputs, hashed | — |
+| Records | A research ledger that is logically append-only | `pc-eer` records, scoring records, discrepancy and adjudication records | Truth |
+| Derived analysis | Regenerable, not canonical | Mechanical synthesis, measures, validator reports | Evidence |
+| Critics | — | Bounded analysis and provisional assessments | Human or institutional decision authority |
+| Human scoring and adjudication | Adjudication of discrepancies (§7.12) | Scoring against answer keys, and adjudication of recorded discrepancies | Settling contested questions |
+| TC action governance | Excluded from Baseline v0.1 (§21) | Not imported | — |
 
 ## 9. Open questions
 
-1. **Reconciling with REA v0.1 Stage B** (protocol D10). If the contract defines record
-   types for hypothesis, interpretation and adjudication, `pc-eer` should probably carry
-   them by reference rather than restate them.
-2. **The review-protocol mapping.** Should TC's evidence-bound review categories be mapped
-   formally to council findings? A correspondence is sketched in row 3; it is not adopted.
-3. **The trust vocabulary.** Should any council term join the canonical trust vocabulary?
-   Candidates are *corroboration*, *standing* and *adjudication*. None is proposed now:
-   the vocabulary's own rule keeps domain-specific terms local.
-4. **Where fixtures live.** Should ACE ever host council fixtures? Recommended no: ACE
-   scores control-plane decision contracts, a different domain.
-5. **Branch coverage.** Only two of TC's 142 branches were inspected, so terms defined only
-   on unmerged branches may be missing here.
+1. **Carrier alignment.** Once REA selects a carrier encoding, should council records also
+   be exportable as REA `EpistemicRecord` envelopes, for example one interpretation record
+   per finding? Not before REA's design freeze (REA §24).
+2. **Adjudication scope.** REA leaves open whether an adjudication may designate a
+   preferred claim globally or only for a named analysis (§23.2, item 1). The council uses
+   *named-analysis scope only*: an adjudication says which coding a named measure uses,
+   and why.
+3. **The record's name (D13).** Keep "epistemic evaluation record" from the handoff, or
+   rename it to avoid the REA homonym, for example "epistemic critique record"?
+4. **Confidence of scorers and adjudicators.** If these are recorded, should REA's ordinal
+   vocabulary, with a rationale, be required?
+5. **REA's own TC pin** (`codex/agents-governance-separation@8cff76d`) was not inspected.
+   REA's claims about that checkout stay REA's, unverified here.
+6. **Carried from r0.**
+   - The mapping to TC's review-protocol categories.
+   - Candidate trust-vocabulary terms.
+   - Whether ACE should host council fixtures (recommended: no).
+   - TC branch coverage: only two of 142 branches were inspected.
 
 ## 10. No-change verification
 
-At the end of drafting, `git status --short` in the TC, ACE and `triagecore-signed-intent`
-clones printed nothing. The only operation performed against TC beyond the clone was a
-read-only `git fetch` of the two branches named in section 1, into the local clone. No
-branch, commit, push, issue or pull-request comment was made in any of the three
-repositories. The only repository changed is this one, on its development branch.
+On 2026-10-28, `git status --short` printed nothing in the TC, ACE and
+`triagecore-signed-intent` clones, and their HEADs were unchanged from section 1. r1
+performed no operation against those repositories beyond reads. No branch, commit, push,
+issue or comment was made in any of them. The REA file is not stored in this repository.
 
-To reproduce the citations:
+## Appendix A. Pinned hashes (SHA-256)
 
-```sh
-git clone https://github.com/coreytshaffer/TriageCore triagecore
-git -C triagecore checkout 4e9f238512eec4d9fc417542745962783d3e675f
-git clone https://github.com/coreytshaffer/agent-control-evals ace
-git -C ace checkout b876a287fc27701e79f16208640f86845f1edafc
-# then compare the files below with `sha256sum` and read the cited lines
-```
+**REA v0.1 Stage B (operator file).** As received, SHA-256
+`a0ece23a770d603e4220bc0847cdf02fdbb96e640022d46d8794ac4391f733e3`.
 
-## Appendix A. Pinned file hashes (SHA-256)
+**TriageCore at `4e9f238`.** All entries from r0 still apply, unchanged. Added in r1:
 
-**TriageCore at `4e9f238`.**
+| File | SHA-256 |
+|---|---|
+| `docs/evidence_schema.md` | `07287090645eff4ada25896a503fe4d651d87839f00a1228288b7898ad99cc62` |
+
+Carried from r0:
 
 | File | SHA-256 |
 |---|---|
@@ -289,39 +312,21 @@ git -C ace checkout b876a287fc27701e79f16208640f86845f1edafc
 | `docs/evals/external_evaluator_adapter_contract.md` | `5f4819e8beea85a0188456ea30ef11c15ea0880c2827fd915c55927438f32572` |
 | `docs/change/requests/CR-005-local-preflight-context-compression.md` | `7bfff08456c471ea0811903d3088345abbb04b6e43cec6316fc2fc299e92608a` |
 | `docs/change/requests/CR-130-approved-status-authority-semantics.md` | `56443bbf0c5c391ff61c8bf9597a347030324a9edcb4f3ab6ead6d8957fb7f16` |
-| `docs/change/requests/CR-134-public-export-admission-contract.md` | `2fa5b469b40c81ee1ff56edda3800bfea2dca0daf86f17c811f0874ee8866263` |
 | `docs/operations/local-heavy-diagnostic-2026-08-07.md` | `faa73f54d4eddbfa982a8292a5b372832482b0a176972b7b279edb352a5b1de2` |
 | `docs/operations/privacy-declaration-evidence-join-2026-08-29.md` | `3d7552f4ba936d126d7d883622fefe21067fbb2dc80e93990858b94cf485aeba` |
 | `docs/operations/privacy-propagation-2026-08-29.md` | `f368df4495cadee3b1de5d1d3ac47adf1c6d50596f471b8adc1c040ffaafca03` |
 | `docs/operations/classifier-terminal-fallback-2026-08-29.md` | `7ef412afc5c39020c5e3d5bf49207bffb1be6a6c53ac3f4ba80fa0f4c1d5490f` |
 | `docs/operations/control-plane-invariant-checklist.md` | `dc51be9e257e45c47da79f3e6ebebd9d1f3e579bdc0b4598fdd8f816fb171815` |
-| `docs/operations/monitoring-coverage-baseline-2026-10-22.md` | `66a5bd01a47e4418209be3030fe4763fd297027b2a2eace82b701fc3e91c5b5a` |
-| `docs/verification_guide.md` | `6a32c4ac1d211378b474b4cdcdc75ee8973cded4ee45bc07875572c904877bb6` |
 | `docs/security/runtime_integrity_model_provenance_policy.md` | `0d310931915ac1517c82a73d8608b298333fd90ee89b4fd99848ae18eb1b48e8` |
 | `docs/current_backlog.md` | `73f8dd26c6b609f881f9b2dd60dc474b2baa07d8efdc8a81bf2343c667ae413c` |
 | `triage_core/capability_claims.py` | `5667e30c1718048cb11c49500c92070f89e305ade92703d989b08b7b1846603f` |
-| `triage_core/compression.py` | `50f62b8f7709349b883a74938d4c819dfa51f89a5bcd8bc2539baf3cdf711e81` |
 | `triage_core/task_ledger.py` | `ab9be73a38e3e7f2cb4b1dec1a0436f5338380239ac19e2bd105126affa39f61` |
 | `triage_core/orchestration.py` | `ab23cf09378ea450a7c574c370ce94bea4eece0f375e839faa02f1502498e875` |
-| `triage_core/context_budget.py` | `bb816282d46eba8a49dbd29f45fa1929368d288634423d40b90a2829ae3d399d` |
 
-**agent-control-evals at `b876a28`.**
+r0's appendix also pins `docs/verification_guide.md`, `docs/change/requests/CR-134-…`,
+`docs/operations/monitoring-coverage-baseline-2026-10-22.md`, `triage_core/compression.py`
+and `triage_core/context_budget.py`. Those hashes are unchanged, and remain in r0 at
+`ea9ecbd`.
 
-| File | SHA-256 |
-|---|---|
-| `README.md` | `ae7ee30ea41a087752775e67c096fa9ec3a7ca5b5e1a8c49662220731e9002b2` |
-| `docs/evaluator_signal_model.md` | `3d600484f894c63635597f4c443be2102319a53ff5395278c4946bdf98ff3936` |
-| `docs/oracle_alignment_findings.md` | `1f5fc5eecfeb0f0bf377fe25cf8f19c1ff07e52cc7ee372f06e3c6d5fda89835` |
-| `docs/trust_boundary_eval_family.md` | `8634fde500f009763d6f0bf82702a5297ad6680462ac1339becffc4f1f49ea22` |
-| `docs/reuse_manifest.md` | `b3843549caba7c9434658b6acabd7c9b4e7c9eaf7f699ab5394c5daa9cc44c04` |
-| `docs/adversarial_actuals.md` | `a979b7d5c48fdd546e252e0ec795105832f616ab978e57ccedce852ce4ea9ead` |
-| `docs/reason_taxonomy.md` | `7f87caf80b6ca5e4d0af29b976b138cfa0ef635502212e7ce12254229d664689` |
-| `schemas/scenario_fixture.schema.json` | `f0a79c29beb782d8cde8309756b01b8d3d9d561609f912c1c6199f45b16eab41` |
-| `fixtures/scenarios/provenance_confusion_001.json` | `ce102c092cb3bbcc338fc62d8c26744831c51dfcf2fa0e0442c45b39e52197dc` |
-| `fixtures/scenarios/memory_laundering_001.json` | `f5c7c9bcdde328a736c35cc92af82bac156253a0f6e4e9018c7cee3e3f8d6044` |
-
-**This repository at `78371f0`.**
-
-| File | SHA-256 |
-|---|---|
-| `trust-vocabulary.md` | `c082ae38b3ddbb963108eae749967239c25039f6c5688de9613c33d8e243f018` |
+**agent-control-evals at `b876a28`.** Unchanged from r0. See r0's appendix at `ea9ecbd`,
+or recompute with `sha256sum` at that commit.

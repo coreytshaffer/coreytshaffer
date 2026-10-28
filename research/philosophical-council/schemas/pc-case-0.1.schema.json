@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "pc-case-0.1.schema.json",
   "title": "Philosophical Council case packet (pc-case/0.1, proposed)",
-  "description": "Proposed, not accepted. One critic-visible fixture packet. Everything in a case file may be shown to a critic, so a case file never contains expectations, categories or author notes; those live only in the adjudicator-only expectation file. The exact stored bytes of the case file are the packet whose SHA-256 identifies what every critic received.",
+  "description": "Proposed, not accepted. Schema revision r1: fidelity_claim is optional instead of nullable (no universal null, after REA v0.1 Stage B); no r0 case used null, so r0 case files are unchanged. One critic-visible fixture packet. Everything in a case file may be shown to a critic, so a case file never contains expectations, categories or author notes; those live only in the scorer-only expectation file. The exact stored bytes of the case file are the packet whose SHA-256 identifies what every critic received.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -115,8 +115,7 @@
           "produced_by",
           "lossy",
           "known_omissions",
-          "fidelity_check",
-          "fidelity_claim"
+          "fidelity_check"
         ],
         "properties": {
           "transformation_id": { "type": "string", "pattern": "^X[0-9]+$" },
@@ -129,7 +128,11 @@
           "lossy": { "type": "boolean" },
           "known_omissions": { "type": "string", "minLength": 1 },
           "fidelity_check": { "enum": ["none", "self_reported", "independent_spot_check", "independent_full_check"] },
-          "fidelity_claim": { "type": ["string", "null"] }
+          "fidelity_claim": {
+            "description": "The producer's own claim about the transformation's fidelity, if it made one; omitted otherwise. A claim is not a check: see fidelity_check.",
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     }

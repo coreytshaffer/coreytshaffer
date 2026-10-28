@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pc-eer-0.1.schema.json",
-  "title": "Philosophical Council epistemic evaluation record (pc-eer/0.1, proposed)",
-  "description": "Proposed, not accepted, not implemented. Structural schema for one evaluation of one case packet by one study condition. It records what reviewers reported and a synthesis that preserves every position. It carries no decision, approval or truth field. Semantic rules that JSON Schema cannot express (quote matching, cross-references, synthesis coverage) are listed in epistemic-evaluation-record.md section 6. Defect codes are not part of this record: they are assigned later by human adjudication.",
+  "$id": "pc-eer-0.2.schema.json",
+  "title": "Philosophical Council epistemic evaluation record (pc-eer/0.2, proposed)",
+  "description": "Proposed, not accepted. Structural schema for one critique of one case packet by one study condition. It constrains structure and metadata only: field presence, closed vocabularies, constants, identifiers and absence tags. It does not constrain what free-text fields say (interpretation, rationale, supportable_reformulation, verification_requests, note, justification), so prose can still assert truth, safety, intent or authority; that is detected only by human scoring. Cross-record rules are in epistemic-evaluation-record.md section 6 and validation/validate.py. Absence follows the REA v0.1 Stage B rule: no universal null; a field may use only the absence tags its contract names, and optional absence is omission.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -21,7 +21,7 @@
     "integrity"
   ],
   "properties": {
-    "record_format": { "const": "pc-eer/0.1-proposed" },
+    "record_format": { "const": "pc-eer/0.2-proposed" },
     "record_id": { "$ref": "#/$defs/token" },
     "record_status": {
       "enum": ["illustrative_example", "study_record"],
@@ -32,7 +32,7 @@
       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
     },
     "non_claims": {
-      "description": "Constant non-claims carried in the data itself. A record cannot certify truth, safety or intent, confer authority, or claim to represent anyone.",
+      "description": "Constant metadata stating what the record does not assess. The constants bound the record's structured fields; they do not and cannot constrain free text.",
       "type": "object",
       "additionalProperties": false,
       "required": ["truth", "safety", "intent", "authority", "representation"],
@@ -45,9 +45,9 @@
       }
     },
     "study_context": {
-      "description": "Null for illustrative examples.",
+      "description": "not_applicable only for illustrative examples.",
       "oneOf": [
-        { "type": "null" },
+        { "const": "not_applicable" },
         {
           "type": "object",
           "additionalProperties": false,
@@ -62,7 +62,7 @@
       ]
     },
     "packet": {
-      "description": "Identity of the exact case packet bytes every reviewer received. The subject artifact is segment family A inside this packet.",
+      "description": "Identity of the exact case packet bytes every reviewer received (REA artifact content identity). The subject is segment family A inside this packet.",
       "type": "object",
       "additionalProperties": false,
       "required": ["case_id", "path", "sha256"],
@@ -152,9 +152,9 @@
             "enum": ["generic", "naive", "O1", "O2", "O3", "O4", "O5", "O6", "O1-O6_sequential"]
           },
           "model": {
-            "description": "Immutable model identity. Mutable aliases may appear only as supplementary labels.",
+            "description": "Immutable model identity; mutable aliases may appear only as supplementary labels. not_applicable for human and placeholder reviewers.",
             "oneOf": [
-              { "type": "null" },
+              { "const": "not_applicable" },
               {
                 "type": "object",
                 "additionalProperties": false,
@@ -174,16 +174,16 @@
           },
           "independence_class": { "$ref": "#/$defs/independence_class" },
           "packet_sha256": { "$ref": "#/$defs/sha256" },
-          "prompt_sha256": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/sha256" }] },
-          "output_sha256": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/sha256" }] },
+          "prompt_sha256": { "$ref": "#/$defs/sha256_or_not_applicable" },
+          "output_sha256": { "$ref": "#/$defs/sha256_or_not_applicable" },
           "budget": {
             "type": "object",
             "additionalProperties": false,
             "required": ["max_output_tokens", "used_output_tokens", "used_input_tokens"],
             "properties": {
-              "max_output_tokens": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 1 }] },
-              "used_output_tokens": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0 }] },
-              "used_input_tokens": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0 }] }
+              "max_output_tokens": { "$ref": "#/$defs/count_or_tag" },
+              "used_output_tokens": { "$ref": "#/$defs/count_or_tag" },
+              "used_input_tokens": { "$ref": "#/$defs/count_or_tag" }
             }
           },
           "submitted_before_synthesis": { "type": "boolean" }
@@ -195,42 +195,42 @@
           },
           {
             "if": { "properties": { "kind": { "enum": ["human", "illustrative_placeholder"] } } },
-            "then": { "properties": { "model": { "type": "null" } } }
+            "then": { "properties": { "model": { "const": "not_applicable" } } }
           }
         ]
       }
     },
     "findings": {
-      "description": "Every finding exactly as reported, attributed to one reviewer. No deduplication or rewording.",
+      "description": "Every finding exactly as reported, attributed to one reviewer. No deduplication or rewording. In REA terms each finding is an interpretation derived from the quoted segments.",
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["finding_id", "reviewer_id", "segments", "observations", "interpretation", "severity", "confidence_pct", "verification_requests"],
+        "required": ["finding_id", "reviewer_id", "segments", "quotations", "interpretation", "severity", "reported_confidence_pct", "verification_requests"],
         "properties": {
           "finding_id": { "$ref": "#/$defs/token" },
           "reviewer_id": { "$ref": "#/$defs/token" },
           "segments": { "type": "array", "items": { "$ref": "#/$defs/segment_id" }, "minItems": 1, "uniqueItems": true },
-          "observations": {
-            "description": "What the packet says: exact quotations, mechanically checkable. Interpretation lives only in the interpretation field.",
+          "quotations": {
+            "description": "The reviewer's citations of packet text. A quotation is a claim about what the packet says; the validator's byte-exact check of it is the observation, and source_verification records that check's result.",
             "type": "array",
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["segment_id", "quote", "quote_verified"],
+              "required": ["segment_id", "quote", "source_verification"],
               "properties": {
                 "segment_id": { "$ref": "#/$defs/segment_id" },
                 "quote": { "type": "string", "minLength": 1 },
-                "quote_verified": {
-                  "description": "true: exact substring of the cited segment. false: not found (warn-and-review: retained and flagged). null: not yet checked.",
-                  "type": ["boolean", "null"]
+                "source_verification": {
+                  "description": "REA v0.1 section 5.4 values. source_linked: the quote is an exact substring of the cited segment. source_mismatch: the cited segment does not contain it, or does not exist. unverified: not yet checked.",
+                  "enum": ["source_linked", "source_mismatch", "unverified"]
                 }
               }
             }
           },
           "interpretation": { "type": "string", "minLength": 1 },
           "severity": { "$ref": "#/$defs/severity" },
-          "confidence_pct": { "$ref": "#/$defs/pct" },
+          "reported_confidence_pct": { "$ref": "#/$defs/reported_pct" },
           "verification_requests": { "type": "array", "items": { "type": "string", "minLength": 1 } }
         }
       }
@@ -240,17 +240,22 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["reviewer_id", "support_assessment", "confidence_pct", "rationale", "supportable_reformulation"],
+        "required": ["reviewer_id", "support_assessment", "reported_confidence_pct", "rationale"],
         "properties": {
           "reviewer_id": { "$ref": "#/$defs/token" },
           "support_assessment": { "$ref": "#/$defs/support_assessment" },
-          "confidence_pct": { "$ref": "#/$defs/pct" },
+          "reported_confidence_pct": { "$ref": "#/$defs/reported_pct" },
           "rationale": { "type": "string", "minLength": 1 },
-          "supportable_reformulation": { "type": ["string", "null"] }
+          "supportable_reformulation": {
+            "description": "Optional; omitted when the reviewer offered none.",
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     },
     "synthesis": {
+      "description": "In REA terms a derived analysis: a regenerable projection of the findings and assessments, never canonical evidence.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -280,11 +285,12 @@
           }
         },
         "unresolved_disagreements": {
+          "description": "REA-style discrepancies between positions (kind conflicting_claims, or an integrity discrepancy). Always open here: synthesis never adjudicates; resolution needs a separate adjudication record.",
           "type": "array",
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["disagreement_id", "position_ids", "type", "note"],
+            "required": ["disagreement_id", "position_ids", "type", "status"],
             "properties": {
               "disagreement_id": { "$ref": "#/$defs/token" },
               "position_ids": { "type": "array", "items": { "$ref": "#/$defs/token" }, "minItems": 2, "uniqueItems": true },
@@ -292,7 +298,8 @@
                 "description": "integrity_conflict: records inconsistent with each other (not an opinion). reasoned / framework_dependent: competing assessments, both retained. unclassified: mechanical synthesis does not classify.",
                 "enum": ["unclassified", "reasoned", "framework_dependent", "integrity_conflict"]
               },
-              "note": { "type": ["string", "null"] }
+              "status": { "const": "open" },
+              "note": { "type": "string", "minLength": 1 }
             }
           }
         },
@@ -311,11 +318,11 @@
           }
         },
         "agreement_is_not_corroboration": {
-          "description": "Constant in v0.1. Agreement among reviewers is never recorded as independent corroboration; any corroboration claim needs a separate dependence analysis.",
+          "description": "Constant. Agreement among reviewers is never recorded as independent corroboration; a corroboration claim needs a separate dependence analysis.",
           "const": true
         },
         "dropped_positions": {
-          "description": "Must be empty for single_reviewer and mechanical_union. For model_synthesis, any reviewer position missing from positions is listed here with a justification so the omission stays inspectable.",
+          "description": "Must be empty for single_reviewer and mechanical_union. For model_synthesis, any reviewer position missing from positions is listed here with a justification.",
           "type": "array",
           "items": {
             "type": "object",
@@ -329,21 +336,32 @@
           }
         },
         "synthesized_confidence": {
-          "description": "Constant null in v0.1: confidence is never aggregated across reviewers, so agreement cannot inflate it. Per-reviewer confidence stays on findings and assessments.",
-          "const": null
+          "description": "Constant: confidence is never aggregated across reviewers, so agreement cannot inflate it.",
+          "const": "not_aggregated"
         }
       }
     },
     "integrity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["packet_hash_consistent", "unverified_quote_finding_ids", "invalid_reviewer_outputs"],
+      "required": ["packet_hash_consistent", "quotation_mismatch_finding_ids", "unverified_quotation_finding_ids", "unknown_segment_finding_ids", "invalid_reviewer_outputs"],
       "properties": {
         "packet_hash_consistent": {
           "description": "true only if every reviewer's packet_sha256 equals packet.sha256. false means the run fails closed: it is retained but not scored.",
           "type": "boolean"
         },
-        "unverified_quote_finding_ids": { "type": "array", "items": { "$ref": "#/$defs/token" }, "uniqueItems": true },
+        "quotation_mismatch_finding_ids": {
+          "description": "Findings with at least one quotation whose source_verification is source_mismatch. Warn-and-review: the finding is retained and flagged.",
+          "type": "array", "items": { "$ref": "#/$defs/token" }, "uniqueItems": true
+        },
+        "unverified_quotation_finding_ids": {
+          "description": "Findings with at least one quotation not yet checked. Not permitted in study records.",
+          "type": "array", "items": { "$ref": "#/$defs/token" }, "uniqueItems": true
+        },
+        "unknown_segment_finding_ids": {
+          "description": "Findings that cite a segment ID absent from the packet. Warn-and-review: the finding is retained and flagged.",
+          "type": "array", "items": { "$ref": "#/$defs/token" }, "uniqueItems": true
+        },
         "invalid_reviewer_outputs": {
           "description": "Reviewer outputs that did not parse or did not fit the output format. Retained here, never silently dropped.",
           "type": "array",
@@ -362,18 +380,53 @@
   },
   "allOf": [
     {
-      "if": { "properties": { "record_status": { "const": "study_record" } } },
-      "then": { "properties": { "study_context": { "type": "object" } } }
+      "if": { "properties": { "record_status": { "const": "illustrative_example" } } },
+      "then": { "properties": { "study_context": { "const": "not_applicable" } } }
     },
     {
-      "if": { "properties": { "record_status": { "const": "illustrative_example" } } },
-      "then": { "properties": { "study_context": { "type": "null" } } }
+      "if": { "properties": { "record_status": { "const": "study_record" } } },
+      "then": {
+        "properties": {
+          "study_context": { "type": "object" },
+          "reviewers": {
+            "items": {
+              "properties": {
+                "kind": { "enum": ["model", "human"] },
+                "prompt_sha256": { "$ref": "#/$defs/sha256" },
+                "output_sha256": { "$ref": "#/$defs/sha256" }
+              }
+            }
+          },
+          "findings": {
+            "items": {
+              "properties": {
+                "quotations": {
+                  "items": { "properties": { "source_verification": { "enum": ["source_linked", "source_mismatch"] } } }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "$defs": {
     "token": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$" },
     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-    "pct": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "sha256_or_not_applicable": {
+      "description": "not_applicable only where the record status permits it (illustrative examples).",
+      "oneOf": [{ "$ref": "#/$defs/sha256" }, { "const": "not_applicable" }]
+    },
+    "count_or_tag": {
+      "description": "unknown: the provider or harness did not report the value. not_applicable: no call was made (illustrative examples, human reviewers).",
+      "oneOf": [{ "type": "integer", "minimum": 0 }, { "enum": ["unknown", "not_applicable"] }]
+    },
+    "reported_pct": {
+      "description": "The reviewer's self-reported confidence, recorded as a measured value. It is not a confidence classification of the record (REA v0.1 section 6) and promotes nothing.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
     "case_id": { "type": "string", "pattern": "^PC-(F[0-9]{2}|TOY-[0-9]{2})$" },
     "source_id": { "type": "string", "pattern": "^(S|T)[0-9]+$" },
     "segment_id": { "type": "string", "pattern": "^(A[0-9]+|(S|T)[0-9]+\\.[0-9]+)$" },
@@ -383,7 +436,7 @@
       "enum": ["decisive", "material", "minor", "note"]
     },
     "support_assessment": {
-      "description": "How well the presented reasons and evidence support the subject's conclusion. Not a judgment of whether the conclusion is true.",
+      "description": "How well the presented reasons and evidence support the subject's conclusion. Not a judgment of whether the conclusion is true, and not an REA evaluation (which assesses a hypothesis or theory).",
       "enum": [
         "adequately_supported_as_scoped",
         "supported_at_reduced_strength_or_scope",

@@ -1,5 +1,5 @@
 {
-  "record_format": "pc-eer/0.1-proposed",
+  "record_format": "pc-eer/0.2-proposed",
   "record_id": "pc-eer-example-toy-01",
   "record_status": "illustrative_example",
   "created_at": "2026-10-27T00:00:00Z",
@@ -10,7 +10,7 @@
     "authority": "none",
     "representation": "none"
   },
-  "study_context": null,
+  "study_context": "not_applicable",
   "packet": {
     "case_id": "PC-TOY-01",
     "path": "examples/PC-TOY-01.case.json",
@@ -27,24 +27,24 @@
       "reviewer_id": "r1",
       "kind": "illustrative_placeholder",
       "procedure": "O6",
-      "model": null,
+      "model": "not_applicable",
       "independence_class": "context_isolated_model_shared",
       "packet_sha256": "50bff41721b7dfa77b2686ec11da34e86d4cab888af936f15434b1923b091649",
-      "prompt_sha256": null,
-      "output_sha256": null,
-      "budget": { "max_output_tokens": null, "used_output_tokens": null, "used_input_tokens": null },
+      "prompt_sha256": "not_applicable",
+      "output_sha256": "not_applicable",
+      "budget": { "max_output_tokens": "not_applicable", "used_output_tokens": "not_applicable", "used_input_tokens": "not_applicable" },
       "submitted_before_synthesis": true
     },
     {
       "reviewer_id": "r2",
       "kind": "illustrative_placeholder",
       "procedure": "O5",
-      "model": null,
+      "model": "not_applicable",
       "independence_class": "context_isolated_model_shared",
       "packet_sha256": "50bff41721b7dfa77b2686ec11da34e86d4cab888af936f15434b1923b091649",
-      "prompt_sha256": null,
-      "output_sha256": null,
-      "budget": { "max_output_tokens": null, "used_output_tokens": null, "used_input_tokens": null },
+      "prompt_sha256": "not_applicable",
+      "output_sha256": "not_applicable",
+      "budget": { "max_output_tokens": "not_applicable", "used_output_tokens": "not_applicable", "used_input_tokens": "not_applicable" },
       "submitted_before_synthesis": true
     }
   ],
@@ -53,25 +53,25 @@
       "finding_id": "f1",
       "reviewer_id": "r1",
       "segments": ["A3", "S1.2"],
-      "observations": [
-        { "segment_id": "A3", "quote": "Since most people prefer B, B is better.", "quote_verified": true },
-        { "segment_id": "S1.2", "quote": "Respondents were not asked about cost or maintenance.", "quote_verified": true }
+      "quotations": [
+        { "segment_id": "A3", "quote": "Since most people prefer B, B is better.", "source_verification": "source_linked" },
+        { "segment_id": "S1.2", "quote": "Respondents were not asked about cost or maintenance.", "source_verification": "source_linked" }
       ],
       "interpretation": "A3 moves from what respondents prefer to which option is better. The survey did not cover cost or maintenance, so it cannot settle 'better' on those criteria; it supports only the narrower claim that most respondents prefer B.",
       "severity": "material",
-      "confidence_pct": 80,
+      "reported_confidence_pct": 80,
       "verification_requests": []
     },
     {
       "finding_id": "f2",
       "reviewer_id": "r2",
       "segments": ["A3"],
-      "observations": [
-        { "segment_id": "A3", "quote": "B is better", "quote_verified": true }
+      "quotations": [
+        { "segment_id": "A3", "quote": "B is better", "source_verification": "source_linked" }
       ],
       "interpretation": "Whether majority preference settles which option is better depends on what 'better' means for this decision. If the choice should follow respondents' preferences, A3 holds; if other criteria such as cost matter, it does not. The answer does not say which standard applies.",
       "severity": "material",
-      "confidence_pct": 70,
+      "reported_confidence_pct": 70,
       "verification_requests": ["Ask the team lead which criteria the decision should use."]
     }
   ],
@@ -79,16 +79,15 @@
     {
       "reviewer_id": "r1",
       "support_assessment": "supported_at_reduced_strength_or_scope",
-      "confidence_pct": 75,
+      "reported_confidence_pct": 75,
       "rationale": "The evidence supports 'most respondents prefer B', not 'B is the better choice'.",
       "supportable_reformulation": "Most survey respondents (124 of 200) prefer option B; the survey did not ask about cost or maintenance."
     },
     {
       "reviewer_id": "r2",
       "support_assessment": "framework_dependent",
-      "confidence_pct": 65,
-      "rationale": "The conclusion depends on an unstated standard for 'better'.",
-      "supportable_reformulation": null
+      "reported_confidence_pct": 65,
+      "rationale": "The conclusion depends on an unstated standard for 'better'."
     }
   ],
   "synthesis": {
@@ -102,7 +101,8 @@
         "disagreement_id": "d1",
         "position_ids": ["p1", "p2"],
         "type": "unclassified",
-        "note": "Mechanical synthesis does not classify disagreements. Both positions are retained."
+        "status": "open",
+        "note": "Mechanical synthesis does not classify or adjudicate. Both positions are retained."
       }
     ],
     "segment_attention": [
@@ -111,11 +111,13 @@
     ],
     "agreement_is_not_corroboration": true,
     "dropped_positions": [],
-    "synthesized_confidence": null
+    "synthesized_confidence": "not_aggregated"
   },
   "integrity": {
     "packet_hash_consistent": true,
-    "unverified_quote_finding_ids": [],
+    "quotation_mismatch_finding_ids": [],
+    "unverified_quotation_finding_ids": [],
+    "unknown_segment_finding_ids": [],
     "invalid_reviewer_outputs": []
   }
 }

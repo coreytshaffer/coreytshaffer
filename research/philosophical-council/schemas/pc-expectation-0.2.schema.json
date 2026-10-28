@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pc-expectation-0.1.schema.json",
-  "title": "Philosophical Council case expectation (pc-expectation/0.1, proposed)",
-  "description": "Proposed, not accepted. Adjudicator-only answer key for one case packet. Never shown to critics or included in any prompt. Every required detection must be inferable from the critic-visible case packet; facts known only to the fixture author go in author_only_knowledge and are never required. The finding-code, overreach-marker, severity and support vocabularies here must match the study protocol and pc-eer/0.1.",
+  "$id": "pc-expectation-0.2.schema.json",
+  "title": "Philosophical Council case expectation (pc-expectation/0.2, proposed)",
+  "description": "Proposed, not accepted. Scorer-only answer key for one case packet. Never shown to critics or included in any prompt. In REA v0.1 terms its planted items are claims about the case packet, source-linked by exact quotations. Every required detection must be inferable from the critic-visible packet; facts known only to the fixture author go in author_only_knowledge and are never required. The finding-code, overreach-marker, severity and support vocabularies here must match the study protocol and pc-eer/0.2. Absence: no null; optional absence is omission; not_applicable only where named.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -25,9 +25,9 @@
   ],
   "properties": {
     "canary": { "type": "string", "pattern": "canary GUID [0-9a-f-]{36}$" },
-    "expectation_format": { "const": "pc-expectation/0.1-proposed" },
+    "expectation_format": { "const": "pc-expectation/0.2-proposed" },
     "case_id": { "type": "string", "pattern": "^PC-F[0-9]{2}$" },
-    "visibility": { "const": "adjudicator_only" },
+    "visibility": { "const": "scorer_only" },
     "category": {
       "enum": [
         "conceptual_error",
@@ -41,16 +41,23 @@
     "derivation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["method", "drafted_by", "second_reader", "status"],
+      "required": ["method", "drafted_by", "reproduction_state"],
       "properties": {
         "method": { "type": "string", "minLength": 1 },
         "drafted_by": { "type": "string", "minLength": 1 },
-        "second_reader": {
-          "description": "A human who re-derived the planted findings from the case packet alone, without first seeing this file. Null until that review happens.",
-          "type": ["string", "null"]
+        "reproduction_state": {
+          "description": "REA v0.1 section 5.5 values, applied to the derivation of this answer key. reproduced requires a qualifying independent activity: a human second reader re-deriving the planted items from the case packet alone, before seeing this file. not_attempted until then.",
+          "enum": ["not_attempted", "reproduced", "failed_to_reproduce", "mixed", "unknown"]
         },
-        "status": { "enum": ["draft_unreviewed", "second_reader_agreed", "revised_after_review"] }
-      }
+        "second_reader": {
+          "description": "The human who performed the independent re-derivation. Omitted while reproduction_state is not_attempted.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "if": { "properties": { "reproduction_state": { "const": "not_attempted" } } },
+      "then": { "not": { "required": ["second_reader"] } },
+      "else": { "required": ["second_reader"] }
     },
     "expected_support_assessment": { "$ref": "#/$defs/support_assessment" },
     "acceptable_support_assessments": {
@@ -60,7 +67,7 @@
       "uniqueItems": true
     },
     "expect_no_material_defect": {
-      "description": "true for benign controls: any finding adjudicated at material or decisive severity is a false alarm.",
+      "description": "true for benign controls: any finding scored at material or decisive severity is a false alarm.",
       "type": "boolean"
     },
     "planted": {
@@ -76,7 +83,7 @@
             "enum": ["primary", "secondary"]
           },
           "codes": {
-            "description": "Codes an adjudicator may assign when crediting this item. The rationale must still meet credit_criteria.",
+            "description": "Codes a scorer may assign when crediting this item. The rationale must still meet credit_criteria.",
             "type": "array",
             "items": { "$ref": "#/$defs/finding_code" },
             "minItems": 1,
@@ -115,20 +122,23 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["trap_id", "description", "loci", "adjudication", "overreach_marker", "max_non_penalized_severity"],
+        "required": ["trap_id", "description", "loci", "scored_as", "max_non_penalized_severity"],
         "properties": {
           "trap_id": { "type": "string", "pattern": "^PC-F[0-9]{2}-T[0-9]+$" },
           "description": { "type": "string", "minLength": 1 },
           "loci": { "type": "array", "items": { "$ref": "#/$defs/segment_id" }, "minItems": 1, "uniqueItems": true },
-          "adjudication": { "enum": ["invalid", "unsupported", "outside_stipulation"] },
-          "overreach_marker": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/overreach_marker" }] },
+          "scored_as": { "enum": ["invalid", "unsupported", "outside_stipulation"] },
+          "overreach_marker": {
+            "description": "Present only when raising the trap is also an overreach. Omitted otherwise.",
+            "$ref": "#/$defs/overreach_marker"
+          },
           "max_non_penalized_severity": { "$ref": "#/$defs/severity" }
         }
       }
     },
     "disagreement_expectations": {
       "oneOf": [
-        { "type": "null" },
+        { "const": "not_applicable" },
         {
           "type": "object",
           "additionalProperties": false,
@@ -155,7 +165,7 @@
     },
     "transformation_expectations": {
       "oneOf": [
-        { "type": "null" },
+        { "const": "not_applicable" },
         {
           "type": "object",
           "additionalProperties": false,
