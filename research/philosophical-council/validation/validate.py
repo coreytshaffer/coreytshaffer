@@ -17,8 +17,9 @@ Usage:
     python3 research/philosophical-council/validation/validate.py [--root DIR]
 
 Exit status: 0 when every rule passes and every negative control is detected;
-1 on any rule failure, any rule that could not run, any missed or invalid
-negative control, or any rule without a negative control; 2 on usage errors.
+1 on any rule failure, any rule that could not run, any missed, imprecise or
+invalid negative control, or any rule without a negative control; 2 on usage
+errors.
 """
 
 import argparse
@@ -36,7 +37,7 @@ try:
 except ImportError:  # schema rules are then reported as not run, and the run fails
     jsonschema = None
 
-VALIDATOR_VERSION = "pc-validate 0.3"
+VALIDATOR_VERSION = "pc-validate 0.4"
 
 RULES = {
     "F01": "Data files (JSON and SHA256SUMS) contain only ASCII bytes",
@@ -64,12 +65,12 @@ RULES = {
     "FX18": "Disagreement and transformation expectations appear exactly for their categories and name existing transformations",
     "FX19": "Each of the six categories appears exactly once",
     "FX20": "The fixtures README carries the canary",
-    "EX01": "Example case packets conform to pc-case/0.1",
-    "V0": "Records conform to pc-eer/0.2",
+    "EX01": "Example case packets conform to pc-case/0.1; FX04-FX11 also apply to them",
+    "V0": "Records conform to pc-eer/0.3",
     "V1": "packet.sha256 equals the SHA-256 of the packet bytes, and case IDs agree",
     "V2": "packet_hash_consistent matches the reviewers' packet hashes",
-    "V3": "Reviewer and finding IDs are unique, and every finding, assessment and invalid output names a declared reviewer",
-    "V4": "Each valid reviewer has exactly one assessment",
+    "V3": "Reviewer and finding IDs are unique, and every finding, assessment, invalid output and transport failure names a declared reviewer",
+    "V4": "Each reviewer has exactly one outcome (an assessment, an invalid output or a transport failure), and only transport failures have output_sha256 no_output",
     "V5": "Quotation source_verification matches a byte-exact substring check, and integrity lists flagged findings truthfully",
     "V6": "Findings citing segments absent from the packet are listed in integrity.unknown_segment_finding_ids",
     "V7": "Positions plus dropped positions partition the assessments exactly: unique position IDs, each assessed reviewer once under its own assessment, no assessment twice; none dropped by mechanical synthesis",
@@ -80,13 +81,13 @@ RULES = {
     "V12": "Every reviewer submitted before synthesis; single_reviewer has exactly one reviewer",
     "V13": "Study records: the condition matches the reviewers and the synthesis method",
     "PIN01": "Every SHA256SUMS entry is well formed, exists and matches the file bytes",
-    "PIN02": "SHA256SUMS pins every case, answer key, the index and every pinned document, once each",
+    "PIN02": "SHA256SUMS pins every case, answer key and example, the index and every pinned document, once each",
 }
 
 SCHEMA_FILES = {
     "case": "schemas/pc-case-0.1.schema.json",
     "expectation": "schemas/pc-expectation-0.2.schema.json",
-    "eer": "schemas/pc-eer-0.2.schema.json",
+    "eer": "schemas/pc-eer-0.3.schema.json",
 }
 SCHEMA_RULES = {"case": ["FX01", "EX01"], "expectation": ["FX02"], "eer": ["V0"]}
 
@@ -474,14 +475,20 @@ def check_record(path, rec, files, parsed, validators, report):
     for a in assessments:
         if a.get("reviewer_id") not in by_id:
             report.fail("V3", path, f"assessment names unknown reviewer {a.get('reviewer_id')!r}")
-    for x in integrity.get("invalid_reviewer_outputs", []):
-        if x.get("reviewer_id") not in by_id:
-            report.fail("V3", path, f"invalid_reviewer_outputs names unknown reviewer {x.get('reviewer_id')!r}")
+    for key in ("invalid_reviewer_outputs", "transport_failures"):
+        for x in integrity.get(key, []):
+            if x.get("reviewer_id") not in by_id:
+                report.fail("V3", path, f"{key} names unknown reviewer {x.get('reviewer_id')!r}")
 
-    invalid = {x.get("reviewer_id") for x in integrity.get("invalid_reviewer_outputs", [])}
-    assessed = sorted(a.get("reviewer_id") for a in assessments)
-    if assessed != sorted(set(reviewer_ids) - invalid):
-        report.fail("V4", path, "reviewer_assessments must cover each valid reviewer exactly once")
+    transport = [x.get("reviewer_id") for x in integrity.get("transport_failures", [])]
+    outcomes = Counter([a.get("reviewer_id") for a in assessments]
+                       + [x.get("reviewer_id") for x in integrity.get("invalid_reviewer_outputs", [])] + transport)
+    for rid in reviewer_ids:
+        if outcomes[rid] != 1:
+            report.fail("V4", path, f"reviewer {rid} has {outcomes[rid]} outcomes; it needs exactly one: an assessment, an invalid output or a transport failure")
+    for r in reviewers:
+        if (r.get("output_sha256") == "no_output") != (r.get("reviewer_id") in transport):
+            report.fail("V4", path, f"reviewer {r.get('reviewer_id')}: output_sha256 must be no_output exactly when its call ended in a transport failure")
 
     mismatched, unverified, unknown = set(), set(), set()
     for f in findings:
@@ -614,6 +621,7 @@ def check_examples(files, parsed, validators, report):
             report.fail("V0", path, "not a JSON object")
         elif "case_format" in doc:
             schema_check(validators, "case", "EX01", path, doc, report)
+            check_case(path, doc, report)
         elif "record_format" in doc:
             check_record(path, doc, files, parsed, validators, report)
         else:
@@ -642,7 +650,7 @@ def check_pins(files, parsed, report):
             report.fail("PIN01", "fixtures/SHA256SUMS", f"{match.group(2)} is pinned but missing")
         elif sha256(data) != match.group(1):
             report.fail("PIN01", "fixtures/SHA256SUMS", f"{match.group(2)} does not match its pin")
-    required = {p for p in files if p.startswith(("fixtures/cases/", "fixtures/expectations/")) and p.endswith(".json")}
+    required = {p for p in files if p.startswith(("fixtures/cases/", "fixtures/expectations/", "examples/")) and p.endswith(".json")}
     required.add("fixtures/index.json")
     index = parsed.get("fixtures/index.json")
     pinned = index.get("pinned_documents", []) if isinstance(index, dict) else []
@@ -728,8 +736,8 @@ def run_controls(files, controls):
     for control in controls:
         cid = control.get("id", "?")
         expect = control.get("expect", [])
-        if not expect or not control.get("ops") or any(rule not in RULES for rule in expect):
-            results.append((cid, "INVALID", "control needs ops and known expected rules", []))
+        if not expect or not control.get("ops") or any(rule not in RULES for rule in expect) or not isinstance(control.get("exact", False), bool):
+            results.append((cid, "INVALID", "control needs ops, known expected rules and a boolean exact", []))
             continue
         try:
             report = run_rules(apply_control(files, control))
@@ -740,6 +748,8 @@ def run_controls(files, controls):
         missing = [rule for rule in expect if rule not in report.failures]
         if missing:
             results.append((cid, "MISSED", "expected " + ", ".join(missing) + " did not fire", also))
+        elif control.get("exact") is True and also:
+            results.append((cid, "IMPRECISE", "expected only " + ", ".join(expect), also))
         else:
             results.append((cid, "DETECTED", "expected " + ", ".join(expect), also))
     return results

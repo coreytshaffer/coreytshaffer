@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "pc-expectation-0.2.schema.json",
   "title": "Philosophical Council case expectation (pc-expectation/0.2, proposed)",
-  "description": "Proposed, not accepted. Scorer-only answer key for one case packet. Never shown to critics or included in any prompt. In REA v0.1 terms its planted items are claims about the case packet, source-linked by exact quotations. Every required detection must be inferable from the critic-visible packet; facts known only to the fixture author go in author_only_knowledge and are never required. The finding-code, overreach-marker, severity and support vocabularies here must match the study protocol and pc-eer/0.2. Absence: no null; optional absence is omission; not_applicable only where named.",
+  "description": "Proposed, not accepted. Scorer-only answer key for one case packet. Never shown to critics or included in any prompt. In REA v0.1 terms its planted items are claims about the case packet, source-linked by exact quotations. Every required detection must be inferable from the critic-visible packet; facts known only to the fixture author go in author_only_knowledge and are never required. The finding-code, overreach-marker, severity and support vocabularies here must match the study protocol and the current pc-eer record format. Absence: no null; optional absence is omission; not_applicable only where named.",
   "type": "object",
   "additionalProperties": false,
   "required": [

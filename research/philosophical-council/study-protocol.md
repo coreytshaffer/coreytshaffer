@@ -1,9 +1,10 @@
-# Philosophical Council — Study Protocol (r2, proposed)
+# Philosophical Council — Study Protocol (r3, proposed)
 
-**Status: proposed planning artifact, revision r2 (2026-10-28).** This revision supersedes
-r1 (commit `5ad1c3a`) and r0 (commit `ea9ecbd`), which remain in history. r2 changes only
-the confidence-calibration measure: M6 now has explicit target rules (section 8.1), which
-D14 fixes at registration.
+**Status: proposed planning artifact, revision r3 (2026-10-28).** This revision supersedes
+r2 (commit `69d8739`), r1 (`5ad1c3a`) and r0 (`ea9ecbd`), which remain in history. r3
+applies the operator's decisions D15 and D16: each disagreement states its scope (section
+6.6), and each reviewer has one completed output per trial (section 6.8). r2 gave M6
+explicit target rules (section 8.1).
 
 - **What exists:** this protocol, six development fixtures, a proposed record format, and a
   validator with negative controls.
@@ -261,7 +262,8 @@ regenerable from the stored outputs and never canonical evidence.
 
 - All findings are kept, attributed and unedited.
 - There is one position per distinct overall assessment.
-- If positions differ, one open disagreement is recorded.
+- If positions differ, one open disagreement is recorded. Its scope is the overall support
+  assessment, the only issue a mechanical union can identify.
 - Segment attention is recorded together with independence classes.
 - No confidence is aggregated.
 
@@ -280,6 +282,12 @@ The record itself never collapses positions.
 **Exploratory: model synthesis.** A synthesizer receives the stored outputs and writes a
 `pc-eer` synthesis. Any position it omits must be listed in `dropped_positions`. Any claims
 it makes about confidence are kept for measurement only, outside the record.
+
+**Disagreement scope (decision D15).** Every recorded disagreement states its scope: what
+the positions disagree about. The same positions can conflict over several distinct
+issues, so two disagreements with different IDs may relate the same positions. A repeated
+disagreement ID is rejected (V8). Whether two scopes name the same issue is left to human
+review; nothing checks it mechanically.
 
 ### 6.7 Run provenance
 
@@ -306,7 +314,31 @@ Each critic call is an REA trial (§14). For each run, record:
 
 **Failures stay in the data.** Timeouts, provider errors, rate limits, capped calls and
 outputs that do not parse remain observations in the analysis. They are never dropped
-(REA §14). A packet-hash mismatch fails closed: the run is kept but not scored.
+(REA §14); section 6.8 says where a record lists each. A packet-hash mismatch fails
+closed: the run is kept but not scored.
+
+### 6.8 One completed output per reviewer (decision D16)
+
+A critic call is one trial (section 6.7), and each reviewer in a record is one trial.
+
+- **One completed output.** A trial yields at most one completed output: a response the
+  provider returned in full. It is never requested again because of its content, for
+  example because it does not parse, does not fit the output format, or is unwelcome.
+- **Invalid output.** A completed output that does not parse or does not fit the format is
+  kept as an artifact and listed once in the record's `invalid_reviewer_outputs`. That
+  reviewer has no assessment.
+- **Transport failure.** A call that ends without a completed output, by timeout,
+  connection error, provider error or rate limit, produced no output. It is listed once
+  in the record's `transport_failures`, never as an invalid output, and the reviewer's
+  `output_sha256` is `no_output`. The trial's `termination_reason` records the same
+  failure.
+- **No re-sends.** A failed call is not sent again, whatever the failure. A second call
+  would be a second trial for the same reviewer, and the record format has no attempt or
+  output identities to tell trials apart. Any future retry policy needs those identities
+  first (record design, section 9).
+- **Checked.** V4 requires each reviewer in a record to have exactly one outcome: an
+  assessment, one invalid output or one transport failure. V3 requires every entry to name
+  a declared reviewer.
 
 ## 7. Controls
 
@@ -446,7 +478,8 @@ experiment (§14). It evaluates no hypothesis.
     revision. Until then the state is `mixed` or `failed_to_reproduce`.
 - **G2, executability.**
   - Every run completes or has a recorded termination reason.
-  - At least 95% of outputs parse on the first attempt.
+  - At least 95% of completed outputs parse. There are no retries (section 6.8), and
+    transport failures are reported separately, with their rate.
   - Every packet and prompt hash is recorded.
   - I-1 to I-7 are satisfied.
   - `validation/validate.py` passes at the commit used for the runs, and that run is
@@ -698,7 +731,7 @@ authority to make it.
 |---|---|---|
 | D1 | Philosophical operators | Adopt O1–O6 as written, or edit, then freeze. |
 | D2 | Isolation and independence criteria | Adopt I-1 to I-7. |
-| D3 | Record formats | Adopt `pc-eer/0.2` and the scoring, discrepancy and adjudication fields (record design, section 7). |
+| D3 | Record formats | Adopt `pc-eer/0.3` and the scoring, discrepancy and adjudication fields (record design, section 7). |
 | D4 | Measures and gate | Adopt M1–M12 and G1–G7. |
 | D5 | Conceptual/technical boundary | Packet-only critics with no tools in v0.1 (section 13). |
 | D6 | Community authority | Adopt the section 14 rules. |
@@ -710,6 +743,8 @@ authority to make it.
 | D12 | Authorization to run | Not granted. Feasibility runs need an explicit grant naming scope, model, budget and expiry. |
 | D13 | Record name | Keep "epistemic evaluation record" from the handoff, or rename it to avoid the REA `evaluation` homonym. |
 | D14 | Registration parameters | Fix the margins Δ and δ, the permutation test for H3, the M6 target rules (section 8.1), and the analysis details before registration. |
+| D15 | Disagreements over the same positions | **Decided** by the operator on 2026-10-28, in the review of r2. Different disagreement IDs over the same positions stay allowed, because the same positions can conflict over several distinct issues. Each disagreement states its scope; semantic duplication is left to human review; repeated IDs are rejected (V8). Scope: `pc-eer/0.3`. No expiration set. Implemented in r3 (section 6.6). |
+| D16 | Outputs per reviewer | **Decided** by the operator on 2026-10-28, in the review of r2. One completed output per reviewer per trial, with no retries based on the output's content. Transport failures are recorded separately, and repeated invalid entries for one reviewer are rejected (V4). Scope: this feasibility protocol. Condition: future retries need explicit attempt and output identities. Implemented in r3 (section 6.8), which also sends no call again after a transport failure, since a second call would be a second trial. |
 
 ## Appendix A. Draft prompt blocks (freeze before any run)
 

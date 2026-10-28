@@ -1,12 +1,16 @@
-# Epistemic Evaluation Record — `pc-eer/0.2` (proposed)
+# Epistemic Evaluation Record — `pc-eer/0.3` (proposed)
 
-**Status: proposed planning artifact, revision r2 (2026-10-28).**
+**Status: proposed planning artifact, revision r3 (2026-10-28).**
 
 - Not accepted, and not used in any run.
-- Supersedes `pc-eer/0.1` (r0, commit `ea9ecbd`), which remains in history.
-- r2 tightens rules V3 and V7–V11 (section 6) and adds `duplicate_of` to the scoring
-  record (section 7.1). The record format and its schema are unchanged from r1.
-- The structural schema is [`schemas/pc-eer-0.2.schema.json`](schemas/pc-eer-0.2.schema.json).
+- Supersedes `pc-eer/0.2` (r1 and r2, last at commit `69d8739`) and `pc-eer/0.1` (r0,
+  commit `ea9ecbd`), which remain in history.
+- r3 applies the operator's decisions D15 and D16 (protocol, section 16). Each disagreement
+  states its `scope`. `integrity` gains `transport_failures`, and a call that produced no
+  output has `output_sha256` `no_output`. V3 and V4 change accordingly (section 6). A
+  second illustrative record, over a packet with a transformation, is in `examples/`.
+- r2 tightened V3 and V7–V11 and added `duplicate_of` to the scoring record (section 7.1).
+- The structural schema is [`schemas/pc-eer-0.3.schema.json`](schemas/pc-eer-0.3.schema.json).
 - The semantic rules in section 6 are implemented in
   [`validation/validate.py`](validation/validate.py). Each rule has a negative control.
   Nothing runs the validator automatically.
@@ -113,11 +117,11 @@ as envelopes is an open question (reconciliation, section 9).
 | `study_context` | Study, protocol revision, condition `C0`–`C4`, replicate | `not_applicable` for illustrative examples, and required for study records. |
 | `packet` | `case_id`, `path`, `sha256` | |
 | `lineage.declared`, `lineage.transformations` | Declared lineage and its roots; transformation ceilings and fidelity checks | Mirrors the packet (V10, V11). |
-| `reviewers` | Procedure, model identity, independence class, packet, prompt and output hashes, budget, submission order | See the absence tags in section 5. Study records require real prompt and output hashes, and allow no placeholder reviewers. |
+| `reviewers` | Procedure, model identity, independence class, packet, prompt and output hashes, budget, submission order | See the absence tags in section 5. Study records require a real prompt hash and an output hash or `no_output`, and allow no placeholder reviewers. |
 | `findings` | Segments, quotations with `source_verification`, interpretation, severity, `reported_confidence_pct`, verification requests | Kept exactly as reported. |
 | `reviewer_assessments` | One support assessment per reviewer, with `reported_confidence_pct`, rationale and an optional supportable reformulation | The reformulation is omitted when none was offered. |
-| `synthesis` | Positions; unresolved disagreements (status `open`); segment attention; two constants; dropped positions | A derived analysis. |
-| `integrity` | Packet-hash consistency; findings flagged for quotation mismatch, unverified quotation, or an unknown segment; invalid reviewer outputs | Flags are warn-and-review: the finding is kept and listed, and V5 and V6 check that the lists are truthful. |
+| `synthesis` | Positions; unresolved disagreements (status `open`, each with its scope); segment attention; two constants; dropped positions | A derived analysis. |
+| `integrity` | Packet-hash consistency; findings flagged for quotation mismatch, unverified quotation, or an unknown segment; invalid reviewer outputs; transport failures | Flags are warn-and-review: the finding is kept and listed, and V5 and V6 check that the lists are truthful. Each reviewer has exactly one outcome (section 5, V4). |
 
 **Defect codes are not in this record.** Reviewers describe problems in their own words;
 scorers assign codes in the scoring record. This keeps the defect taxonomy out of every
@@ -188,6 +192,20 @@ corroboration.
 - `attribution_dropped`
 - `other`
 
+**Reviewer outcomes.** Each reviewer in a record is one trial (protocol, section 6.8) and
+has exactly one outcome (V4):
+
+- an assessment, from a completed output that fits the format;
+- one entry in `invalid_reviewer_outputs`, for a completed output that did not parse or
+  did not fit the format;
+- one entry in `transport_failures`, for a call that ended without a completed output.
+  Its `kind` is `timeout`, `connection_error`, `provider_error`, `rate_limited` or
+  `other`, with a reason, and the reviewer's `output_sha256` is `no_output`.
+
+**Disagreement scope.** Each disagreement states what its positions disagree about. Two
+disagreements with different IDs may relate the same positions when they concern distinct
+issues (D15). Whether two scopes name the same issue is left to human review.
+
 **Absence, by field.** There is no universal null (REA §9.2, decision DD-RE-006). Each
 field allows only the states listed here.
 
@@ -195,7 +213,8 @@ field allows only the states listed here.
 |---|---|
 | `study_context` | `not_applicable` (illustrative examples only) |
 | `reviewers[].model` | `not_applicable` (human and placeholder reviewers only) |
-| `reviewers[].prompt_sha256`, `output_sha256` | `not_applicable` (illustrative examples only) |
+| `reviewers[].prompt_sha256` | `not_applicable` (illustrative examples only) |
+| `reviewers[].output_sha256` | `not_applicable` (illustrative examples only); `no_output` (the call ended in a transport failure) |
 | `reviewers[].budget.*` | `unknown` (not reported by the provider or harness), `not_applicable` (no call made) |
 | `reviewer_assessments[].supportable_reformulation` | Omitted when none was offered |
 | `synthesis.unresolved_disagreements[].note` | Omitted when there is no note |
@@ -223,15 +242,15 @@ R2-D2):
 
 | Rule | Requirement | On failure |
 |---|---|---|
-| V0 | The record conforms to `pc-eer/0.2`. | fail closed |
+| V0 | The record conforms to `pc-eer/0.3`. | fail closed |
 | V1 | `packet.sha256` equals the SHA-256 of the packet bytes, and the case IDs agree. | fail closed |
 | V2 | `packet_hash_consistent` is true exactly when every reviewer's packet hash equals `packet.sha256`. A truthful `false` keeps the run but excludes it from scoring. | fail closed |
-| V3 | Reviewer and finding IDs are unique. Every finding, assessment and invalid output names a declared reviewer. Position holders and segment attention are checked by exact comparison in V7 and V9. | fail closed |
-| V4 | Each valid reviewer has exactly one assessment. Invalid outputs are listed in `integrity`. | fail closed |
+| V3 | Reviewer and finding IDs are unique. Every finding, assessment, invalid output and transport failure names a declared reviewer. Position holders and segment attention are checked by exact comparison in V7 and V9. | fail closed |
+| V4 | Each reviewer has exactly one outcome: one assessment, one invalid output or one transport failure. An invalid output listed twice therefore fails. `output_sha256` is `no_output` exactly for transport failures. | fail closed |
 | V5 | Each checked quotation's `source_verification` matches a byte-exact substring check. The integrity lists of mismatched and unverified findings are exactly right. | Misquotation: warn-and-review. Misstated status: fail closed. |
 | V6 | Findings citing segments absent from the packet are exactly those listed in `unknown_segment_finding_ids`. | Unknown segment: warn-and-review. Misstated list: fail closed. |
 | V7 | Positions plus dropped positions exactly partition the assessments. Position IDs are unique, each assessed reviewer is held exactly once under that reviewer's own assessment, and no assessment appears in two entries. None is dropped by `single_reviewer` or `mechanical_union`. | fail closed |
-| V8 | Disagreement IDs are unique, and disagreements reference listed positions. When there is more than one position, each one is in an open disagreement; positions are counted, not their distinct IDs. | fail closed |
+| V8 | Disagreement IDs are unique, and disagreements reference listed positions. When there is more than one position, each one is in an open disagreement; positions are counted, not their distinct IDs. Two disagreements with different IDs may relate the same positions (D15); the schema requires each to state its scope. | fail closed |
 | V9 | `segment_attention` is the projection of the findings, with one entry per segment and correct independence classes. | fail closed |
 | V10 | `lineage.declared` mirrors the packet's `derived_from` metadata and its roots, with one entry per evidence item. | fail closed |
 | V11 | `lineage.transformations` mirrors the packet's transformation records, with one entry each, and effect citations resolve. | fail closed |
@@ -240,9 +259,10 @@ R2-D2):
 
 The validator also checks the fixtures, the schemas themselves and the pins; see the
 [validation README](validation/README.md). What a pass does and does not establish is
-stated there and in section 2. Only the illustrative example exists today, so V13 reports
-"not applicable". Its negative control turns the example into a study record to show that
-V13 fires.
+stated there and in section 2. Only two illustrative records exist today, so V13 reports
+"not applicable". Its negative control turns the first example into a study record to show
+that V13 fires. The second example's packet contains a transformation, so V11 has a record
+that passes and controls that must fail (NC-V11b, NC-V11c).
 
 ## 7. Scoring, discrepancies and adjudication
 
@@ -393,16 +413,14 @@ free text:
 - **Integrity.** There are no signatures or attestation. Hashes establish byte identity
   only, and nothing here is tamper-proof (REA §18).
 - **Revision.** Argument revision and sycophancy dynamics are not modelled.
-- **Repeated invalid outputs.** The protocol does not yet say whether a failed critic call
-  is retried. If it is, one reviewer could have several invalid outputs. So V3 requires
-  only that each entry in `invalid_reviewer_outputs` names a declared reviewer, and allows
-  a reviewer to appear more than once. V4 treats any listed reviewer as having no valid
-  output. A retry policy would need an attempt identifier.
-- **Repeated disagreements.** V8 rejects a repeated disagreement ID. It allows two
-  disagreements with different IDs over the same positions, because the format does not yet
-  say whether that is one discrepancy recorded twice or two distinct ones. REA §7.3 makes
-  only exact identifier collisions mechanically rejectable; differently identified
-  equivalents are preserved and linked for review.
+- **Retries.** The feasibility protocol has none (protocol, section 6.8; D16). A retry
+  policy, for transport failures or for content, would first need explicit attempt and
+  output identities, so that each attempt is a distinguishable trial.
+- **Semantic duplication of disagreements.** Two disagreements over the same positions are
+  allowed when their scopes name distinct issues (D15). Whether two scopes name the same
+  issue is left to human review: REA §7.3 makes only exact identifier collisions
+  mechanically rejectable, and differently identified equivalents are preserved and linked
+  for review.
 - **Collection semantics.** REA requires every collection to declare `list`, `set`, `map`
   or `multiset` semantics and its duplicate behaviour (§9.2; §20, criterion 26). Council
   schemas do not declare these per collection; the V-rules enforce them for the keyed

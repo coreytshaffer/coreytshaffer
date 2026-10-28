@@ -1,6 +1,6 @@
-# Validation — `pc-validate 0.3`
+# Validation — `pc-validate 0.4`
 
-**Status: proposed planning tooling, committed in revision r1 and revised in r2.** It checks the
+**Status: proposed planning tooling, committed in revision r1 and revised in r2 and r3.** It checks the
 planning documents and data in this directory. It is not, and does not test, any council
 implementation. Nothing runs it automatically: there is no CI.
 
@@ -21,8 +21,8 @@ closed rather than passing without them.
 **Exit status.**
 
 - `0`: every rule passed and every negative control was detected.
-- `1`: any rule failed or could not run; any negative control was missed or invalid; or
-  some rule has no negative control.
+- `1`: any rule failed or could not run; any negative control was missed, imprecise or
+  invalid; or some rule has no negative control.
 - `2`: usage error.
 
 ## What it does
@@ -35,17 +35,19 @@ closed rather than passing without them.
    - `SCH01`: the schema set and schema validity.
    - `FX01`–`FX20`: fixtures. Schema conformance, lineage, answer-key structure, exact
      `inferable_from` quotations, leaks into critic-visible packets, and the canary.
-   - `EX01` and `V0`–`V13`: example packets and records. Schema conformance, then the
-     record rules V1–V13 from the
-     [record design](../epistemic-evaluation-record.md), section 6.
+   - `EX01` and `V0`–`V13`: example packets and records. Schema conformance, the
+     case-structure rules FX04–FX11 for example packets, then the record rules V1–V13 from
+     the [record design](../epistemic-evaluation-record.md), section 6.
    - `PIN01`–`PIN02`: `fixtures/SHA256SUMS` matches the bytes and covers everything it
-     must.
+     must, the examples included.
 3. **Applies the negative controls.** Each control in
    [`negative_controls.json`](negative_controls.json) injects one fault into an in-memory
    copy of the files. The rule it names must then fire. Examples: a fabricated quotation
    still marked `source_linked`, a minority position silently dropped, or a category word
    leaked into a case title. If a named rule does not fire, the validator has regressed. A
    rule with no control also fails the run, so every check has to show that it can fail.
+   A control marked `exact` must fire its named rules and no others; otherwise it is
+   IMPRECISE, and the run fails.
 4. **Prints a report.** The header records the validator's and controls' SHA-256 and the
    Python and `jsonschema` versions. For a given checkout and environment the report
    contains no timestamps and no host paths, so a second run reproduces it exactly.
@@ -75,19 +77,24 @@ run, the r1 rules missed every control below and the r2 rules detected each one.
 - **Shadowing.** NC-V9b and NC-V10b put a falsified entry before a correct one. A
   comparison that keeps the last entry per key never sees the falsified one, which is how
   r1 missed them.
-- **One check without a committed control.** V11's check that a record lists each
-  transformation once has no control. The illustrative record's packet has no
-  transformation, so a control would need a second example record. A drafting test built
-  a scratch record over PC-F05 in memory. The r1 rules accepted a repeated transformation
-  entry, and also a falsified fidelity check (`independent_spot_check` for a self-reported
-  summary) placed before a correct entry. The r2 rules rejected both under V11. The test
-  is not committed, so it cannot be rerun from this checkout.
+- **V11 (added in r3).** r2's V11 repeat check had no committed control, because the
+  first example's packet has no transformation. r3 adds a second example, a packet with
+  transformation X1 (`examples/PC-TOY-02.case.json`) and a valid record over it
+  (`examples/pc-eer-illustrative-02.json`). NC-V11b appends an exact duplicate of the X1
+  entry. NC-V11c raises the first X1 entry's fidelity check from `self_reported` to
+  `independent_spot_check` and appends a correct entry after it. Both are `exact`: each
+  fires V11 and the pin check on the edited example, and nothing else. The r1 rules miss
+  both.
+- **Invalid outputs (r3, decision D16).** A reviewer has exactly one outcome, so an invalid
+  output listed twice fails V4 (NC-V4b). The r1 and r2 rules miss it.
 - **Allowed on purpose.** Two disagreements with different IDs over the same positions,
-  and one reviewer listed more than once in `invalid_reviewer_outputs`. The
-  [record design](../epistemic-evaluation-record.md), section 9, says why both are open.
-- **`json_append`.** Controls can append to an array, so a control can state a mutation as
-  it was found, for example "append an exact copy of a position". The controls format is
-  `pc-negative-controls/0.3`.
+  since the same positions can conflict over distinct issues (decision D15). Each must
+  state its scope; whether two scopes name the same issue is left to human review.
+- **`json_append` and `exact`.** Controls can append to an array, so a control can state a
+  mutation as it was found, for example "append an exact copy of a position". A control
+  marked `exact` lists every rule it must fire, and no other rule may fire. Example files
+  are pinned, so an exact control that edits one also lists `PIN01`. The controls format
+  is `pc-negative-controls/0.4`.
 
 ## What a pass establishes, and what it does not
 
@@ -118,6 +125,7 @@ run, the r1 rules missed every control below and the r2 rules detected each one.
 `fixtures/SHA256SUMS` commits to the following bytes:
 
 - the six case packets and six answer keys;
+- every file in `examples/`: the two toy packets and the two illustrative records;
 - the index;
 - the documents named in `index.json` under `pinned_documents`. These are the protocol,
   the record design, the three schemas, and this directory's validator and controls.
@@ -138,7 +146,7 @@ Regenerate the pins after any change to a pinned file:
 cd research/philosophical-council/fixtures
 sha256sum cases/PC-F0*.case.json expectations/PC-F0*.expected.json index.json \
   ../study-protocol.md ../epistemic-evaluation-record.md ../schemas/*.schema.json \
-  ../validation/validate.py ../validation/negative_controls.json > SHA256SUMS
+  ../examples/*.json ../validation/validate.py ../validation/negative_controls.json > SHA256SUMS
 ```
 
 ## Recording a run

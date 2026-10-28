@@ -1,5 +1,5 @@
 {
-  "record_format": "pc-eer/0.2-proposed",
+  "record_format": "pc-eer/0.3-proposed",
   "record_id": "pc-eer-example-toy-01",
   "record_status": "illustrative_example",
   "created_at": "2026-10-27T00:00:00Z",
@@ -100,6 +100,7 @@
       {
         "disagreement_id": "d1",
         "position_ids": ["p1", "p2"],
+        "scope": "Overall support for the conclusion in A1. Mechanical union records only that the two support assessments differ.",
         "type": "unclassified",
         "status": "open",
         "note": "Mechanical synthesis does not classify or adjudicate. Both positions are retained."
@@ -118,6 +119,7 @@
     "quotation_mismatch_finding_ids": [],
     "unverified_quotation_finding_ids": [],
     "unknown_segment_finding_ids": [],
-    "invalid_reviewer_outputs": []
+    "invalid_reviewer_outputs": [],
+    "transport_failures": []
   }
 }

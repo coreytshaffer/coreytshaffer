@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pc-eer-0.2.schema.json",
-  "title": "Philosophical Council epistemic evaluation record (pc-eer/0.2, proposed)",
+  "$id": "pc-eer-0.3.schema.json",
+  "title": "Philosophical Council epistemic evaluation record (pc-eer/0.3, proposed)",
   "description": "Proposed, not accepted. Structural schema for one critique of one case packet by one study condition. It constrains structure and metadata only: field presence, closed vocabularies, constants, identifiers and absence tags. It does not constrain what free-text fields say (interpretation, rationale, supportable_reformulation, verification_requests, note, justification), so prose can still assert truth, safety, intent or authority; that is detected only by human scoring. Cross-record rules are in epistemic-evaluation-record.md section 6 and validation/validate.py. Absence follows the REA v0.1 Stage B rule: no universal null; a field may use only the absence tags its contract names, and optional absence is omission.",
   "type": "object",
   "additionalProperties": false,
@@ -21,7 +21,7 @@
     "integrity"
   ],
   "properties": {
-    "record_format": { "const": "pc-eer/0.2-proposed" },
+    "record_format": { "const": "pc-eer/0.3-proposed" },
     "record_id": { "$ref": "#/$defs/token" },
     "record_status": {
       "enum": ["illustrative_example", "study_record"],
@@ -175,7 +175,7 @@
           "independence_class": { "$ref": "#/$defs/independence_class" },
           "packet_sha256": { "$ref": "#/$defs/sha256" },
           "prompt_sha256": { "$ref": "#/$defs/sha256_or_not_applicable" },
-          "output_sha256": { "$ref": "#/$defs/sha256_or_not_applicable" },
+          "output_sha256": { "$ref": "#/$defs/output_sha256" },
           "budget": {
             "type": "object",
             "additionalProperties": false,
@@ -186,7 +186,10 @@
               "used_input_tokens": { "$ref": "#/$defs/count_or_tag" }
             }
           },
-          "submitted_before_synthesis": { "type": "boolean" }
+          "submitted_before_synthesis": {
+            "description": "true when the reviewer's call had ended, with an output or a transport failure, before synthesis began.",
+            "type": "boolean"
+          }
         },
         "allOf": [
           {
@@ -290,10 +293,15 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["disagreement_id", "position_ids", "type", "status"],
+            "required": ["disagreement_id", "position_ids", "scope", "type", "status"],
             "properties": {
               "disagreement_id": { "$ref": "#/$defs/token" },
               "position_ids": { "type": "array", "items": { "$ref": "#/$defs/token" }, "minItems": 2, "uniqueItems": true },
+              "scope": {
+                "description": "What the positions disagree about. The same positions may conflict over several distinct issues; each is its own disagreement with its own scope. Whether two scopes name the same issue is left to human review.",
+                "type": "string",
+                "minLength": 1
+              },
               "type": {
                 "description": "integrity_conflict: records inconsistent with each other (not an opinion). reasoned / framework_dependent: competing assessments, both retained. unclassified: mechanical synthesis does not classify.",
                 "enum": ["unclassified", "reasoned", "framework_dependent", "integrity_conflict"]
@@ -344,7 +352,7 @@
     "integrity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["packet_hash_consistent", "quotation_mismatch_finding_ids", "unverified_quotation_finding_ids", "unknown_segment_finding_ids", "invalid_reviewer_outputs"],
+      "required": ["packet_hash_consistent", "quotation_mismatch_finding_ids", "unverified_quotation_finding_ids", "unknown_segment_finding_ids", "invalid_reviewer_outputs", "transport_failures"],
       "properties": {
         "packet_hash_consistent": {
           "description": "true only if every reviewer's packet_sha256 equals packet.sha256. false means the run fails closed: it is retained but not scored.",
@@ -363,7 +371,7 @@
           "type": "array", "items": { "$ref": "#/$defs/token" }, "uniqueItems": true
         },
         "invalid_reviewer_outputs": {
-          "description": "Reviewer outputs that did not parse or did not fit the output format. Retained here, never silently dropped.",
+          "description": "A reviewer's one completed output in the trial, when it did not parse or did not fit the output format. At most one entry per reviewer (V4). Retained here, never silently dropped.",
           "type": "array",
           "items": {
             "type": "object",
@@ -371,6 +379,20 @@
             "required": ["reviewer_id", "reason"],
             "properties": {
               "reviewer_id": { "$ref": "#/$defs/token" },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "transport_failures": {
+          "description": "Calls that ended without a completed output, so no output exists. Recorded separately from invalid outputs: at most one entry per reviewer, whose output_sha256 is no_output (V4). The call is not re-sent within the trial (protocol section 6.8).",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reviewer_id", "kind", "reason"],
+            "properties": {
+              "reviewer_id": { "$ref": "#/$defs/token" },
+              "kind": { "enum": ["timeout", "connection_error", "provider_error", "rate_limited", "other"] },
               "reason": { "type": "string", "minLength": 1 }
             }
           }
@@ -393,7 +415,7 @@
               "properties": {
                 "kind": { "enum": ["model", "human"] },
                 "prompt_sha256": { "$ref": "#/$defs/sha256" },
-                "output_sha256": { "$ref": "#/$defs/sha256" }
+                "output_sha256": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "const": "no_output" }] }
               }
             }
           },
@@ -416,6 +438,10 @@
     "sha256_or_not_applicable": {
       "description": "not_applicable only where the record status permits it (illustrative examples).",
       "oneOf": [{ "$ref": "#/$defs/sha256" }, { "const": "not_applicable" }]
+    },
+    "output_sha256": {
+      "description": "SHA-256 of the completed output. no_output: the call ended in a transport failure (integrity.transport_failures). not_applicable: illustrative examples only.",
+      "oneOf": [{ "$ref": "#/$defs/sha256" }, { "enum": ["not_applicable", "no_output"] }]
     },
     "count_or_tag": {
       "description": "unknown: the provider or harness did not report the value. not_applicable: no call was made (illustrative examples, human reviewers).",

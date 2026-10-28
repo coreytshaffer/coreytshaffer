@@ -1,6 +1,6 @@
 # Philosophical Council — research planning
 
-**Status: conceptual development; planning artifacts only. Revision r2, 2026-10-28.** No
+**Status: conceptual development; planning artifacts only. Revision r3, 2026-10-28.** No
 implementation is authorized. No model has been run and no data collected. No human has
 yet reviewed these documents, and the answer keys have not been independently re-derived.
 The documents were drafted with AI assistance at the operator's direction.
@@ -32,10 +32,10 @@ section 2).
 
 | Artifact | Exists here | Human-reviewed | Implemented, enforced or run |
 |---|---|---|---|
-| [Study protocol](study-protocol.md) | r2 | No | No harness and no runs |
-| [Epistemic evaluation record](epistemic-evaluation-record.md), `pc-eer/0.2` | Proposed design and [schema](schemas/pc-eer-0.2.schema.json) | No | Checked only by the committed validator, and only on the illustrative example |
-| [Six development fixtures](fixtures/) | r2. Answer keys use `pc-expectation/0.2` and are unchanged from r1; case packets are byte-identical to r0. | No. Each answer key records `reproduction_state: not_attempted`. | Not yet an oracle; gate G1 is pending. |
-| [Validator](validation/), `pc-validate 0.3` | Committed with 60 negative controls | No | Run by hand. Nothing runs it automatically. |
+| [Study protocol](study-protocol.md) | r3 | No | No harness and no runs |
+| [Epistemic evaluation record](epistemic-evaluation-record.md), `pc-eer/0.3` | Proposed design and [schema](schemas/pc-eer-0.3.schema.json) | No | Checked only by the committed validator, and only on the two illustrative examples |
+| [Six development fixtures](fixtures/) | r3. Answer keys use `pc-expectation/0.2` and are unchanged from r1; case packets are byte-identical to r0. | No. Each answer key records `reproduction_state: not_attempted`. | Not yet an oracle; gate G1 is pending. |
+| [Validator](validation/), `pc-validate 0.4` | Committed with 68 negative controls | No | Run by hand. Nothing runs it automatically. |
 | [Semantic-contract reconciliation](semantic-contract-reconciliation.md) | r1, against TC, REA v0.1 Stage B and ACE | No | Documentation only |
 
 ## Contents
@@ -60,11 +60,12 @@ section 2).
   - rules V0–V13;
   - the scoring, discrepancy and adjudication records.
 - **[`schemas/`](schemas/)**: JSON Schemas (Draft 2020-12) for case packets (`pc-case/0.1`),
-  answer keys (`pc-expectation/0.2`) and records (`pc-eer/0.2`).
+  answer keys (`pc-expectation/0.2`) and records (`pc-eer/0.3`).
 - **[`fixtures/`](fixtures/)**: six critic-visible case packets and six scorer-only answer
   keys. They carry a canary, and their hashes are pinned in `SHA256SUMS`.
-- **[`examples/`](examples/)**: a toy packet and one hand-written illustrative record. It
-  contains no model output and is not a result.
+- **[`examples/`](examples/)**: two toy packets and two hand-written illustrative records.
+  The second packet contains a transformation. They contain no model output, are not
+  results, and are pinned in `SHA256SUMS`.
 - **[`validation/`](validation/)**: the validator, its negative controls, and a statement
   of what a pass does and does not establish.
 
@@ -72,8 +73,33 @@ section 2).
 
 Each revision answers an operator review. Each problem is recorded in REA's terms, as a
 discrepancy (REA v0.1 §7.11) and its adjudication (§7.12). Superseded revisions are not
-erased: r0 stays addressable at `ea9ecbd` and r1 at `5ad1c3a` (REA DD-RE-005). No
-checkpoint has been published.
+erased: r0 stays addressable at `ea9ecbd`, r1 at `5ad1c3a` and r2 at `69d8739` (REA
+DD-RE-005). No checkpoint has been published.
+
+### r3
+
+Revision r3 implements the operator's decisions on r2 (commit `69d8739`). The operator made
+them from the r2 report and did not independently check `69d8739`, so r2's results remain
+drafting claims. Two of the decisions are recorded REA-style in the protocol, section 16,
+as D15 and D16.
+
+| ID | Item | Source | Resolution in r3 | Effect |
+|---|---|---|---|---|
+| R3-D1 | Decision D15. Different disagreement IDs over the same positions stay allowed, because the same positions can conflict over several distinct issues. Each disagreement must state its scope, semantic duplication is left to human review, and repeated IDs stay rejected. | Operator decision on r2, 2026-10-28 | `scope` is required in `pc-eer/0.3`, and V8 is unchanged. NC-V0e removes a scope. Protocol, section 6.6; record design, sections 5 and 9. | A `pc-eer/0.2` record no longer validates. The first example is migrated. |
+| R3-D2 | Decision D16. One completed output per reviewer per trial, with no retries based on the output's content. Transport failures are recorded separately, and repeated invalid entries for one reviewer are rejected. Future retries need explicit attempt and output identities. r2 had left repeated entries allowed as an open question. | Operator decision on r2, 2026-10-28 | Protocol, section 6.8, and G2. `pc-eer/0.3` adds `integrity.transport_failures` and the `no_output` hash tag. V4 requires exactly one outcome per reviewer, and V3 resolves transport failures. NC-V4b (an invalid output listed twice; missed by the r1 and r2 rules), NC-V4c and NC-V3c. r3 also sends no call again after a transport failure, because a second call would be a second trial. | A reviewer whose call failed can now be recorded; r2's format could not represent one. |
+| R3-D3 | `missing_evidence`, material non-blocking. r2's V11 repeat check had no committed control. Its drafting test was a scratch artifact that nobody could rerun. | r2 report, 2026-10-28 | A second example: packet PC-TOY-02 with transformation X1, and a valid record over it. NC-V11b appends an exact duplicate X1 entry. NC-V11c puts a falsified X1 entry before a correct one. Examples are now pinned (PIN02) and checked by FX04–FX11 (NC-PIN02b, NC-EX01b). A control marked `exact` must fire its listed rules and no others; all eight r3 controls are exact. | V11 is reproducible from a clean checkout. Each V11 control fires only V11 and the pin check on the edited example. |
+
+**Drafting validator run (r3).**
+
+- Command: `python3 research/philosophical-council/validation/validate.py`
+- Environment: Python 3.13.17 and `jsonschema` 4.26.0.
+- Input: the tree committed with this revision.
+- Result: PASS. 41 rules passed and 1 was not applicable (V13: no study records), and
+  68 of 68 negative controls were detected. The eight r3 controls fired exactly their
+  listed rules. Judged by the r1 rules, NC-V11b, NC-V11c and NC-V4b were missed; judged
+  by the r2 rules, NC-V4b was missed.
+
+This is a historical claim about one run. Repeat the run to reproduce it.
 
 ### r2
 
@@ -87,11 +113,11 @@ r1's validation run and found two mutations that passed every check.
 | R2-D3 | `unknown`, material non-blocking: an ambiguity in a measure, for which REA lists no closer kind. M6 assigned binary Brier targets with no rule for duplicates or disputed scoring. A substantively correct duplicate scored 0, an unresolved dispute had no target, and the Brier score and the high-confidence error rate used different targets. | Operator review of r1, 2026-10-28 | Protocol section 8.1 defines one target for both parts of M6. A duplicate's claim is scored once, through the scoring record's new `duplicate_of`. Disputed findings are left out of the primary analysis, and reported with their share, each competing coding and bounds. D14 fixes these rules at registration. | M6 is defined before registration. No data exist, so nothing is rescored. |
 | R2-D4 | `conflicting_claims`, minor. The r1 drafting report, a session message to the operator that is not stored here, said r1 fixed the PC-F06 packet. The repository says the case packets are byte-identical to r0, and their hashes agree. The fix, which ties the queried interval in segment S1.2 to the maintenance window, was made while drafting r0, before commit `ea9ecbd`. | Operator review of r1, 2026-10-28 | The repository was right and the report was wrong. No file changes. | None on the artifacts. All six packet hashes are unchanged from r0. |
 
-**Drafting validator run.**
+**Drafting validator run (r2).**
 
 - Command: `python3 research/philosophical-council/validation/validate.py`
 - Environment: Python 3.13.17 and `jsonschema` 4.26.0.
-- Input: the tree committed with this revision.
+- Input: the tree committed as r2 (`69d8739`).
 - Result: PASS. 41 rules passed and 1 was not applicable (V13: no study records), and
   60 of 60 negative controls were detected. Judged by the r1 rules, all nine new controls
   were missed.
@@ -142,6 +168,7 @@ The 24-case pilot and multimodal work stay out of scope until the feasibility ga
 | Planning handoff, *Philosophical Council: Research Planning Handoff* | Operator message, 2026-10-27 | Received as message text, so there is no byte hash. Not stored here |
 | Operator review of r0, with the recommended next milestone | Operator message, 2026-10-27 | Not stored here; summarized in the revision record |
 | Operator review of r1 | Operator message, 2026-10-28 | Not stored here; summarized in the revision record (R2-D1, R2-D3 and R2-D4) |
+| Operator decisions on r2 | Operator message, 2026-10-28 | Not stored here; recorded as D15 and D16 (protocol, section 16) and in the revision record (R3-D1 to R3-D3). Made from the r2 report, without an independent check of `69d8739` |
 | REA v0.1, Stage B revision | Operator file, 2026-10-27 | SHA-256 `a0ece23a770d603e4220bc0847cdf02fdbb96e640022d46d8794ac4391f733e3`. Not stored here. The Stage A copy was not supplied or used. |
 | TriageCore | Repository, read-only clone | Commit `4e9f238512eec4d9fc417542745962783d3e675f` |
 | agent-control-evals | Repository, read-only clone | Commit `b876a287fc27701e79f16208640f86845f1edafc` |
@@ -162,8 +189,8 @@ README).
 
 ## Decisions needed before anything runs
 
-The full list is in protocol section 16; D10 (the REA contract) is resolved. The most
-immediate:
+The full list is in protocol section 16. D10 (the REA contract), D15 and D16 are
+resolved. The most immediate:
 
 - **D9.** Name a human second reader to re-derive the answer keys (gate G1). This is the
   main outstanding review.
@@ -172,6 +199,10 @@ immediate:
   parameters. D14 now includes M6's target rules (protocol, section 8.1).
 - **D12.** No run is authorized. A feasibility run needs an explicit grant naming its
   scope, model, budget and expiry.
+- **D16, one reading to confirm.** D16 rules out retries based on an output's content. r3
+  also sends no call again after a transport failure, because a second call would be a
+  second trial (protocol, section 6.8). Allowing such re-sends would first need attempt
+  identities.
 
 ## Relationship to the rest of this repository
 

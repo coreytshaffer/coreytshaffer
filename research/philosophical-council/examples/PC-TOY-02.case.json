@@ -1,0 +1,74 @@
+{
+  "case_format": "pc-case/0.1-proposed",
+  "case_id": "PC-TOY-02",
+  "synthetic_notice": "Illustrative toy packet for explaining how a record mirrors a transformation. Not a study fixture. All content is fictional.",
+  "title": "Pilot timing and the rollout",
+  "request": "A manager asked an AI assistant: 'The weekly digest says staff finish the new form in under five minutes. Can we roll it out to everyone?'",
+  "assistant_had_access_to": ["T1"],
+  "stipulations": [],
+  "subject": {
+    "artifact_id": "A",
+    "description": "The AI assistant's answer to the request.",
+    "segments": [
+      {
+        "segment_id": "A1",
+        "text": "Yes, roll the new form out to everyone."
+      },
+      {
+        "segment_id": "A2",
+        "text": "The pilot showed that staff finish it in under five minutes."
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "source_id": "S1",
+      "title": "Pilot notes",
+      "origin": {
+        "author": "Pilot team",
+        "date": "2026-09-10",
+        "method": "timed pilot with 20 staff",
+        "derived_from": []
+      },
+      "segments": [
+        {
+          "segment_id": "S1.1",
+          "text": "18 of 20 staff finished the new form in under five minutes."
+        },
+        {
+          "segment_id": "S1.2",
+          "text": "All 20 used the current browser. The form was not tried on the older browser that some offices still use."
+        }
+      ]
+    },
+    {
+      "source_id": "T1",
+      "title": "Weekly digest item",
+      "origin": {
+        "author": "Weekly digest tool (automated)",
+        "date": "2026-09-12",
+        "method": "automated summary of the pilot notes",
+        "derived_from": ["S1"]
+      },
+      "segments": [
+        {
+          "segment_id": "T1.1",
+          "text": "Pilot result: staff finish the new form in under five minutes."
+        }
+      ]
+    }
+  ],
+  "transformations": [
+    {
+      "transformation_id": "X1",
+      "source_ids": ["S1"],
+      "output_id": "T1",
+      "method": "summary",
+      "produced_by": "Weekly digest tool (automated)",
+      "lossy": true,
+      "known_omissions": "not recorded",
+      "fidelity_check": "self_reported",
+      "fidelity_claim": "accurate summary"
+    }
+  ]
+}

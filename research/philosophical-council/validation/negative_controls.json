@@ -1,6 +1,6 @@
 {
-  "format": "pc-negative-controls/0.3",
-  "description": "Each control injects one fault into an in-memory copy of the files and names the rules that must fire. A control whose expected rule does not fire means the validator has regressed. Paths are relative to research/philosophical-council/. JSON operations re-serialize the file with two-space indentation; text operations change only the named text.",
+  "format": "pc-negative-controls/0.4",
+  "description": "Each control injects one fault into an in-memory copy of the files and names the rules that must fire. A control whose expected rule does not fire means the validator has regressed. Paths are relative to research/philosophical-council/. JSON operations re-serialize the file with two-space indentation; text operations change only the named text. A control marked exact must fire its expected rules and no others.",
   "controls": [
     {
       "id": "NC-F01",
@@ -201,6 +201,13 @@
       "ops": [{ "op": "json_set", "path": "examples/PC-TOY-01.case.json", "pointer": "/subject/segments", "value": [] }]
     },
     {
+      "id": "NC-EX01b",
+      "description": "An example packet whose title reveals a category word. The case-structure rules apply to example packets, and the record over the packet no longer matches its hash.",
+      "expect": ["FX06", "V1", "PIN01"],
+      "exact": true,
+      "ops": [{ "op": "json_set", "path": "examples/PC-TOY-02.case.json", "pointer": "/title", "value": "Transformed digest and the rollout" }]
+    },
+    {
       "id": "NC-V0",
       "description": "A record claiming authority.",
       "expect": ["V0"],
@@ -223,6 +230,13 @@
       "description": "A model reviewer with no model identity.",
       "expect": ["V0"],
       "ops": [{ "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/reviewers/0/kind", "value": "model" }]
+    },
+    {
+      "id": "NC-V0e",
+      "description": "A disagreement that does not state its scope.",
+      "expect": ["V0", "PIN01"],
+      "exact": true,
+      "ops": [{ "op": "json_remove", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/unresolved_disagreements/0/scope" }]
     },
     {
       "id": "NC-V1",
@@ -249,10 +263,38 @@
       "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/integrity/invalid_reviewer_outputs", "value": { "reviewer_id": "ghost", "reason": "Malformed output" } }]
     },
     {
+      "id": "NC-V3c",
+      "description": "A transport failure attributed to a reviewer the record does not declare.",
+      "expect": ["V3", "PIN01"],
+      "exact": true,
+      "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/integrity/transport_failures", "value": { "reviewer_id": "ghost", "kind": "connection_error", "reason": "Connection reset before any response." } }]
+    },
+    {
       "id": "NC-V4",
       "description": "A reviewer whose assessment is missing.",
       "expect": ["V4"],
       "ops": [{ "op": "json_remove", "path": "examples/pc-eer-illustrative.json", "pointer": "/reviewer_assessments/1" }]
+    },
+    {
+      "id": "NC-V4b",
+      "description": "r2's one completed output was invalid, so its assessment, finding, position and disagreement are removed, but the invalid output is listed twice.",
+      "expect": ["V4", "PIN01"],
+      "exact": true,
+      "ops": [
+        { "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/integrity/invalid_reviewer_outputs", "value": [{ "reviewer_id": "r2", "reason": "Malformed output" }, { "reviewer_id": "r2", "reason": "Malformed output" }] },
+        { "op": "json_remove", "path": "examples/pc-eer-illustrative.json", "pointer": "/reviewer_assessments/1" },
+        { "op": "json_remove", "path": "examples/pc-eer-illustrative.json", "pointer": "/findings/1" },
+        { "op": "json_remove", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/positions/1" },
+        { "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/unresolved_disagreements", "value": [] },
+        { "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/segment_attention/0/reviewer_ids", "value": ["r1"] }
+      ]
+    },
+    {
+      "id": "NC-V4c",
+      "description": "A reviewer with an assessment that is also recorded as a transport failure.",
+      "expect": ["V4", "PIN01"],
+      "exact": true,
+      "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/integrity/transport_failures", "value": { "reviewer_id": "r1", "kind": "timeout", "reason": "No response within the time limit." } }]
     },
     {
       "id": "NC-V5",
@@ -312,7 +354,7 @@
       "id": "NC-V8c",
       "description": "An exact copy of a disagreement appended.",
       "expect": ["V8"],
-      "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/unresolved_disagreements", "value": { "disagreement_id": "d1", "position_ids": ["p1", "p2"], "type": "unclassified", "status": "open", "note": "Mechanical synthesis does not classify or adjudicate. Both positions are retained." } }]
+      "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative.json", "pointer": "/synthesis/unresolved_disagreements", "value": { "disagreement_id": "d1", "position_ids": ["p1", "p2"], "scope": "Overall support for the conclusion in A1. Mechanical union records only that the two support assessments differ.", "type": "unclassified", "status": "open", "note": "Mechanical synthesis does not classify or adjudicate. Both positions are retained." } }]
     },
     {
       "id": "NC-V9",
@@ -351,6 +393,23 @@
       "ops": [{ "op": "json_set", "path": "examples/pc-eer-illustrative.json", "pointer": "/lineage/transformations", "value": [{ "transformation_id": "X1", "output_id": "T1", "standing_ceiling_source_ids": ["S1"], "fidelity_check": "none", "standing_effects_reported": [] }] }]
     },
     {
+      "id": "NC-V11b",
+      "description": "An exact duplicate of the record's transformation entry for X1.",
+      "expect": ["V11", "PIN01"],
+      "exact": true,
+      "ops": [{ "op": "json_append", "path": "examples/pc-eer-illustrative-02.json", "pointer": "/lineage/transformations", "value": { "transformation_id": "X1", "output_id": "T1", "standing_ceiling_source_ids": ["S1"], "fidelity_check": "self_reported", "standing_effects_reported": [{ "effect": "scope_widened", "finding_ids": ["f1"] }, { "effect": "limitations_dropped", "finding_ids": ["f1"] }] } }]
+    },
+    {
+      "id": "NC-V11c",
+      "description": "A falsified entry for X1 (fidelity raised from self_reported to independent_spot_check), followed by a correct entry with the same ID. A comparison that keeps the last entry per ID would not see the falsified one.",
+      "expect": ["V11", "PIN01"],
+      "exact": true,
+      "ops": [
+        { "op": "json_set", "path": "examples/pc-eer-illustrative-02.json", "pointer": "/lineage/transformations/0/fidelity_check", "value": "independent_spot_check" },
+        { "op": "json_append", "path": "examples/pc-eer-illustrative-02.json", "pointer": "/lineage/transformations", "value": { "transformation_id": "X1", "output_id": "T1", "standing_ceiling_source_ids": ["S1"], "fidelity_check": "self_reported", "standing_effects_reported": [{ "effect": "scope_widened", "finding_ids": ["f1"] }, { "effect": "limitations_dropped", "finding_ids": ["f1"] }] } }
+      ]
+    },
+    {
       "id": "NC-V12",
       "description": "A reviewer who submitted after synthesis began.",
       "expect": ["V12"],
@@ -376,6 +435,13 @@
       "description": "A case packet dropped from SHA256SUMS.",
       "expect": ["PIN02"],
       "ops": [{ "op": "remove_line_containing", "path": "fixtures/SHA256SUMS", "text": "  cases/PC-F01.case.json" }]
+    },
+    {
+      "id": "NC-PIN02b",
+      "description": "An example record dropped from SHA256SUMS.",
+      "expect": ["PIN02"],
+      "exact": true,
+      "ops": [{ "op": "remove_line_containing", "path": "fixtures/SHA256SUMS", "text": "  ../examples/pc-eer-illustrative-02.json" }]
     }
   ]
 }

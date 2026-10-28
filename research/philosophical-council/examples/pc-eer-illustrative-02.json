@@ -1,0 +1,101 @@
+{
+  "record_format": "pc-eer/0.3-proposed",
+  "record_id": "pc-eer-example-toy-02",
+  "record_status": "illustrative_example",
+  "created_at": "2026-10-28T00:00:00Z",
+  "non_claims": {
+    "truth": "not_assessed",
+    "safety": "not_assessed",
+    "intent": "not_assessed",
+    "authority": "none",
+    "representation": "none"
+  },
+  "study_context": "not_applicable",
+  "packet": {
+    "case_id": "PC-TOY-02",
+    "path": "examples/PC-TOY-02.case.json",
+    "sha256": "ff29f43be88c94b5d74faf5353ed42dbe9eec2cda98be397073cc92e1b158db1"
+  },
+  "lineage": {
+    "declared": [
+      { "source_id": "S1", "derived_from": [], "declared_roots": ["S1"] },
+      { "source_id": "T1", "derived_from": ["S1"], "declared_roots": ["S1"] }
+    ],
+    "transformations": [
+      {
+        "transformation_id": "X1",
+        "output_id": "T1",
+        "standing_ceiling_source_ids": ["S1"],
+        "fidelity_check": "self_reported",
+        "standing_effects_reported": [
+          { "effect": "scope_widened", "finding_ids": ["f1"] },
+          { "effect": "limitations_dropped", "finding_ids": ["f1"] }
+        ]
+      }
+    ]
+  },
+  "reviewers": [
+    {
+      "reviewer_id": "r1",
+      "kind": "illustrative_placeholder",
+      "procedure": "O3",
+      "model": "not_applicable",
+      "independence_class": "context_isolated_model_shared",
+      "packet_sha256": "ff29f43be88c94b5d74faf5353ed42dbe9eec2cda98be397073cc92e1b158db1",
+      "prompt_sha256": "not_applicable",
+      "output_sha256": "not_applicable",
+      "budget": { "max_output_tokens": "not_applicable", "used_output_tokens": "not_applicable", "used_input_tokens": "not_applicable" },
+      "submitted_before_synthesis": true
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "f1",
+      "reviewer_id": "r1",
+      "segments": ["A2", "T1.1", "S1.1", "S1.2"],
+      "quotations": [
+        { "segment_id": "A2", "quote": "staff finish it in under five minutes", "source_verification": "source_linked" },
+        { "segment_id": "T1.1", "quote": "staff finish the new form in under five minutes", "source_verification": "source_linked" },
+        { "segment_id": "S1.1", "quote": "18 of 20 staff finished the new form in under five minutes.", "source_verification": "source_linked" },
+        { "segment_id": "S1.2", "quote": "The form was not tried on the older browser that some offices still use.", "source_verification": "source_linked" }
+      ],
+      "interpretation": "A2 rests on the digest item T1, a summary of the pilot notes S1 whose fidelity is only self-reported. S1 reports 18 of 20 staff, all on the current browser; T1 drops both the count and the browser limitation. T1 can carry no more standing than S1, which supports only the narrower claim that most pilot staff on the current browser finished in under five minutes.",
+      "severity": "material",
+      "reported_confidence_pct": 75,
+      "verification_requests": ["Check how the form performs on the older browser."]
+    }
+  ],
+  "reviewer_assessments": [
+    {
+      "reviewer_id": "r1",
+      "support_assessment": "supported_at_reduced_strength_or_scope",
+      "reported_confidence_pct": 70,
+      "rationale": "The pilot supports a claim about 18 of 20 staff on the current browser, not a rollout to everyone.",
+      "supportable_reformulation": "In a pilot of 20 staff on the current browser, 18 finished the new form in under five minutes; the older browser was not tested."
+    }
+  ],
+  "synthesis": {
+    "method": "single_reviewer",
+    "positions": [
+      { "position_id": "p1", "support_assessment": "supported_at_reduced_strength_or_scope", "held_by": ["r1"] }
+    ],
+    "unresolved_disagreements": [],
+    "segment_attention": [
+      { "segment_id": "A2", "reviewer_ids": ["r1"], "independence_classes": ["context_isolated_model_shared"] },
+      { "segment_id": "T1.1", "reviewer_ids": ["r1"], "independence_classes": ["context_isolated_model_shared"] },
+      { "segment_id": "S1.1", "reviewer_ids": ["r1"], "independence_classes": ["context_isolated_model_shared"] },
+      { "segment_id": "S1.2", "reviewer_ids": ["r1"], "independence_classes": ["context_isolated_model_shared"] }
+    ],
+    "agreement_is_not_corroboration": true,
+    "dropped_positions": [],
+    "synthesized_confidence": "not_aggregated"
+  },
+  "integrity": {
+    "packet_hash_consistent": true,
+    "quotation_mismatch_finding_ids": [],
+    "unverified_quotation_finding_ids": [],
+    "unknown_segment_finding_ids": [],
+    "invalid_reviewer_outputs": [],
+    "transport_failures": []
+  }
+}
