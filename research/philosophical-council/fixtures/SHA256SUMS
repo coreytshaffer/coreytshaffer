@@ -10,8 +10,8 @@ ebe1de52b4d79113cd56678fd24b867db774e8eea7a6fcf18a6895ce7043df22  expectations/P
 8de3af494e91f0f48abd4f7314d9f47e10d94ffc0bad575b6c5f394888599244  expectations/PC-F04.expected.json
 8e194c9afd8aa2c63b8ee9ef24f3c19eecd4361557a288eb0af2c5f07d55d98a  expectations/PC-F05.expected.json
 a14498176ae41e3275c470b49c5bcc1b54e1372fc11738e7095732843e9ea08a  expectations/PC-F06.expected.json
-fd724c0085d88e72f3a44d41f669ee87c0db439f15ef1e95bc00aaa0bb2527fb  index.json
-a41a3f9b5f72f62bd82ee750b41f3803ac90952215655029b60d32b42f0a6dab  ../study-protocol.md
+bfac3e7302fa787aaa5693cc4ba8aa8048b30f229abc0eae4b98537780e0fc7c  index.json
+d673c3ec467caf43546c24f4f61deddabd7a8fd1ecc638681e94d453c4b8dedd  ../study-protocol.md
 d546e638fddfa985fe74ddde2d04ee2efdb474b728932e50a0a1775acb578ce0  ../epistemic-evaluation-record.md
 cf63be0bcd29fb09f93f4ddf0a6d6da9b07233d4fcd1f1f1f6d7c3d20d9e486e  ../schemas/pc-case-0.1.schema.json
 f00bd27b3f5d8030865f07f4bdd36e56c801ebb4c4ea968a4498695609294014  ../schemas/pc-eer-0.3.schema.json

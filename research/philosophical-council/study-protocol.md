@@ -1,10 +1,11 @@
-# Philosophical Council — Study Protocol (r4, proposed)
+# Philosophical Council — Study Protocol (r5, proposed)
 
-**Status: proposed planning artifact, revision r4 (2026-10-28).** This revision supersedes
-r3 (commit `14de682`), r2 (`69d8739`), r1 (`5ad1c3a`) and r0 (`ea9ecbd`), which remain in
-history. r4 separates the operator's decision D16 from the transport re-send restriction,
-now proposed decision D17, and counts transport failures against scheduled calls (section
-6.8, G2). r3 applied D15 and D16; r2 gave M6 explicit target rules (section 8.1).
+**Status: proposed planning artifact, revision r5 (2026-10-28).** This revision supersedes
+r4 (commit `72172c7`), r3 (`14de682`), r2 (`69d8739`), r1 (`5ad1c3a`) and r0 (`ea9ecbd`),
+which remain in history. r5 makes the call-accounting categories mutually exclusive and
+tracks parsing separately (section 6.8, G2, section 10). r4 separated decision D16 from
+the transport re-send restriction, now proposed decision D17. r3 applied D15 and D16; r2
+gave M6 explicit target rules (section 8.1).
 
 - **What exists:** this protocol, six development fixtures, a proposed record format, and a
   validator with negative controls.
@@ -343,17 +344,32 @@ A critic call is one trial (section 6.7), and each reviewer in a record is one t
 - **Future retry support** of either kind needs explicit attempt and output identities and
   a defined accounting policy first: how attempts count against scheduled calls, budgets
   and G2, and which attempt's output is analysed (record design, section 9).
-- **Accounting.** Each scheduled call that is sent ends in exactly one way: a completed
-  output that parses, a completed output that is invalid, or a transport failure. A
-  scheduled call never sent, for example after a budget stop (section 11), is censored and
-  counted on its own. Reports
-  give each count against scheduled calls. The G2 parse rate uses completed outputs as its
-  denominator; transport failures stay visible as their own count and rate over scheduled
-  calls, and never drop silently out of the parse rate.
+- **Accounting.** Every scheduled call falls in exactly one of four categories:
+  - `valid_completed`: a completed output that parses and fits the required format
+    (section 6.3). The reviewer has an assessment.
+  - `invalid_completed`: a completed output that does not parse, or that parses but does
+    not fit the required format. It is listed in `invalid_reviewer_outputs`.
+  - `transport_failed`: a call that was sent but ended without a completed output. It is
+    listed in `transport_failures`.
+  - `unsent`: a scheduled call never sent, for example after a budget stop (section 11).
+    It is censored, and counted from run provenance (section 6.7).
+
+  So `scheduled = valid_completed + invalid_completed + transport_failed + unsent`, and
+  `completed = valid_completed + invalid_completed`. Reports give each count against
+  scheduled calls. Transport failures stay visible as their own count and as a rate over
+  scheduled calls.
+- **Parsing, tracked separately.** `parsed_completed` counts the completed outputs whose
+  raw text parses as JSON, whether or not they fit the required format. It is found by
+  parsing the stored raw output (section 6.7), not read from the record. A completed
+  output that parses but does not fit the format counts both as parsed and as
+  `invalid_completed`, so parsing is not one of the four categories. The G2 parse rate is
+  `parse_rate = parsed_completed / completed`. When `completed` is 0, the parse rate is not
+  assessable: it is reported as undefined, and it does not satisfy the G2 parse criterion.
 - **Checked.** V4 requires each reviewer in a record to have exactly one outcome: an
   assessment, one invalid output or one transport failure. So in every record the
-  reviewers equal the assessments plus the invalid outputs plus the transport failures.
-  V3 requires every entry to name a declared reviewer.
+  reviewers equal `valid_completed + invalid_completed + transport_failed`. An unsent call
+  has no reviewer entry. V3 requires every entry to name a declared reviewer. Parsing is
+  not checked by any validator rule.
 
 ## 7. Controls
 
@@ -493,8 +509,12 @@ experiment (§14). It evaluates no hypothesis.
     revision. Until then the state is `mixed` or `failed_to_reproduce`.
 - **G2, executability.**
   - Every run completes or has a recorded termination reason.
-  - At least 95% of completed outputs parse. Content-based retries are prohibited (D16),
-    so this is the parse rate of each call's only completed output.
+  - At least 95% of completed outputs parse: `parse_rate = parsed_completed / completed`
+    is at least 0.95 (section 6.8). Parsing is syntactic. An output that parses but does
+    not fit the required format counts as parsed, and also as an invalid completed output.
+    Content-based retries are prohibited (D16), so each call's only completed output is
+    counted. If no output completed, the parse rate is not assessable, and this criterion
+    is not satisfied.
   - Transport failures are counted against scheduled calls and reported with that rate
     (section 6.8). They are not part of the parse rate. G2 sets no threshold for them; the
     operator may add one under D4.
@@ -520,9 +540,10 @@ experiment (§14). It evaluates no hypothesis.
 **What the feasibility study reports:**
 
 - whether the procedure can be executed and scored reliably;
-- call accounting: scheduled calls, completed outputs (parsed and invalid), transport
-  failures and calls never sent, with the transport-failure rate over scheduled calls
-  (section 6.8);
+- call accounting (section 6.8): scheduled calls, valid and invalid completed outputs,
+  transport failures and unsent calls, which sum to the scheduled calls; the
+  transport-failure rate over scheduled calls; and, separately, parsed completed outputs
+  and the parse rate, reported as not assessable when no output completed;
 - what it costs;
 - which fixtures or rubric items need revision.
 

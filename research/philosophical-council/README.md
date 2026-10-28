@@ -1,6 +1,6 @@
 # Philosophical Council — research planning
 
-**Status: conceptual development; planning artifacts only. Revision r4, 2026-10-28.** No
+**Status: conceptual development; planning artifacts only. Revision r5, 2026-10-28.** No
 implementation is authorized. No model has been run and no data collected. No human has
 yet reviewed these documents, and the answer keys have not been independently re-derived.
 The documents were drafted with AI assistance at the operator's direction.
@@ -32,9 +32,9 @@ section 2).
 
 | Artifact | Exists here | Human-reviewed | Implemented, enforced or run |
 |---|---|---|---|
-| [Study protocol](study-protocol.md) | r4 | No | No harness and no runs |
+| [Study protocol](study-protocol.md) | r5 | No | No harness and no runs |
 | [Epistemic evaluation record](epistemic-evaluation-record.md), `pc-eer/0.3` | Proposed design and [schema](schemas/pc-eer-0.3.schema.json) | No | Checked only by the committed validator, and only on the three illustrative examples |
-| [Six development fixtures](fixtures/) | r4. Answer keys use `pc-expectation/0.2` and are unchanged from r1; case packets are byte-identical to r0. | No. Each answer key records `reproduction_state: not_attempted`. | Not yet an oracle; gate G1 is pending. |
+| [Six development fixtures](fixtures/) | r5. Answer keys use `pc-expectation/0.2` and are unchanged from r1; case packets are byte-identical to r0. | No. Each answer key records `reproduction_state: not_attempted`. | Not yet an oracle; gate G1 is pending. |
 | [Validator](validation/), `pc-validate 0.4` | Committed with 69 negative controls | No | Run by hand. Nothing runs it automatically. |
 | [Semantic-contract reconciliation](semantic-contract-reconciliation.md) | r1, against TC, REA v0.1 Stage B and ACE | No | Documentation only |
 
@@ -74,8 +74,31 @@ section 2).
 
 Each revision answers an operator review. Each problem is recorded in REA's terms, as a
 discrepancy (REA v0.1 §7.11) and its adjudication (§7.12). Superseded revisions are not
-erased: r0 stays addressable at `ea9ecbd`, r1 at `5ad1c3a`, r2 at `69d8739` and r3 at
-`14de682` (REA DD-RE-005). No checkpoint has been published.
+erased: r0 stays addressable at `ea9ecbd`, r1 at `5ad1c3a`, r2 at `69d8739`, r3 at
+`14de682` and r4 at `72172c7` (REA DD-RE-005). No checkpoint has been published.
+
+### r5
+
+Revision r5 answers the review of r4 (commit `72172c7`). The reviewer independently cloned
+r4 and reproduced its validation (r4 run block below). This revision changes documentation
+only: no example, control, validator rule or schema constraint. D17 remains proposed and
+undecided.
+
+| ID | Item | Source | Resolution in r5 | Effect |
+|---|---|---|---|---|
+| R5-D1 | `conflicting_claims`, material non-blocking. Protocol section 6.8 defined an invalid completed output as one that does not parse or does not fit the required format. Its accounting then treated "a completed output that parses" and "a completed output that is invalid" as mutually exclusive, though valid JSON can violate the format. Section 10 repeated the overlap as "parsed and invalid". | Review of r4, 2026-10-28 | Section 6.8 defines four mutually exclusive categories: `valid_completed`, `invalid_completed` (parse or format failures), `transport_failed` and `unsent`. So `scheduled = valid_completed + invalid_completed + transport_failed + unsent`, and `completed = valid_completed + invalid_completed`. Parsing is tracked separately, from the stored raw output: an output that parses but violates the format counts as parsed and as invalid. G2 keeps the 95% target, with `parse_rate = parsed_completed / completed`. When no output completed, the rate is reported as not assessable and does not satisfy the criterion. Section 10 is aligned. Transport failures are still reported against scheduled calls, with their threshold left to D4. | The outcome counts can no longer double-count an output, and the G2 parse criterion cannot be met vacuously. No record, rule or control changes. |
+
+**Drafting validator run (r5).**
+
+- Command: `cd research/philosophical-council/fixtures && sha256sum -c SHA256SUMS`, then
+  `cd .. && python3 validation/validate.py`
+- Environment: Python 3.13.17 and `jsonschema` 4.26.0.
+- Input: the tree committed with this revision.
+- Result: all 25 pins match. PASS: 41 rules passed and 1 was not applicable (V13: no
+  study records), and 69 of 69 negative controls were detected, including the nine
+  `exact` controls.
+
+This is a historical claim about one run. Repeat the run to reproduce it.
 
 ### r4
 
@@ -95,12 +118,16 @@ performance, and they authorize no run.
 
 - Command: `python3 research/philosophical-council/validation/validate.py`
 - Environment: Python 3.13.17 and `jsonschema` 4.26.0.
-- Input: the tree committed with this revision.
+- Input: the tree committed as r4 (`72172c7`).
 - Result: PASS. 41 rules passed and 1 was not applicable (V13: no study records), and
   69 of 69 negative controls were detected. The nine `exact` controls fired exactly their
   listed rules.
-
-This is a historical claim about one run. Repeat the run to reproduce it.
+- Reproduced by the reviewer of r4 from an independent clone, with Python 3.12.14 and
+  `jsonschema` 4.26.0. All 25 pins matched, and 41 rules passed with V13 not applicable.
+  All 69 controls were detected, including the nine `exact` ones, and NC-V4d fired exactly
+  V4 and PIN01. The validator and the previous 68 controls were unchanged from r3, and
+  validation failed without `jsonschema`. That run's full output is not stored here. It
+  concerns structural checks only, not the answer keys (gate G1) or model performance.
 
 ### r3
 
@@ -194,6 +221,7 @@ The 24-case pilot and multimodal work stay out of scope until the feasibility ga
 | Planning handoff, *Philosophical Council: Research Planning Handoff* | Operator message, 2026-10-27 | Received as message text, so there is no byte hash. Not stored here |
 | Operator review of r0, with the recommended next milestone | Operator message, 2026-10-27 | Not stored here; summarized in the revision record |
 | Operator review of r1 | Operator message, 2026-10-28 | Not stored here; summarized in the revision record (R2-D1, R2-D3 and R2-D4) |
+| Review of r4, with an independent reproduction of r4's validation | Operator message, 2026-10-28 | Not stored here; summarized in the revision record (R5-D1 and the r4 run block) |
 | Review of r3, with recommendations | Operator message, 2026-10-28 | Not stored here; summarized in the revision record (R4-D1 to R4-D3) and as proposed decision D17. The reviewer could not locate `14de682` from their workspace |
 | Operator decisions on r2 | Operator message, 2026-10-28 | Not stored here; recorded as D15 and D16 (protocol, section 16) and in the revision record (R3-D1 to R3-D3). Made from the r2 report, without an independent check of `69d8739` |
 | REA v0.1, Stage B revision | Operator file, 2026-10-27 | SHA-256 `a0ece23a770d603e4220bc0847cdf02fdbb96e640022d46d8794ac4391f733e3`. Not stored here. The Stage A copy was not supplied or used. |
