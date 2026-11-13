@@ -1,15 +1,20 @@
 # Corey Shaffer
 
-**AI Enablement & Governance | Workflow Automation, Evaluation & Human Review | Environmental Science & Climate Resilience**
+**AI Enablement, Evaluation & Operations | Human Review, Governance & Provenance | Environmental Science & Climate Resilience**
 
 I work on practical AI and data workflows that help people make decisions with visible
 evidence and clear review responsibilities. At North Coast Opportunities, I coordinate
 outreach for the BUILD program in Lake County, including SolarCHILL. I am completing
 a B.S. in Environmental Science at Southern New Hampshire University.
 
-My portfolio connects environmental data systems with bounded AI workflows and
-evaluation. Development includes AI assistance; prototype behavior, software test
-results and field validation are distinct kinds of evidence.
+My portfolio connects environmental data systems with trustworthy AI deployment
+and operations: workflow evaluation, human review, authorization boundaries and
+traceable evidence. These are bounded research and prototype projects, not claims
+of certified or enterprise-scale deployment.
+
+Development includes AI assistance. Proposed capabilities, software tests, synthetic
+records, observed execution and field validation are distinct kinds of evidence;
+a reported decision is not proof that it was enforced.
 
 ## 🌊 Environmental Data Trust
 
@@ -19,7 +24,7 @@ results and field validation are distinct kinds of evidence.
 | [**community-monitoring**](https://github.com/coreytshaffer/community-monitoring) | Intake-side counterpart: simulated field-sensor pipeline with schema validation, semantic QA/QC, station provenance checks, and human-review routing before public use. |
 | [**framework-aligned-emissions-calculator**](https://github.com/coreytshaffer/framework-aligned-emissions-calculator) | Local-first Python prototype for Scope 1 stationary combustion, location-based Scope 2 electricity, and educational spend-based Scope 3 Category 1 screening. *Not a certified GHG inventory tool.* |
 
-## 🛡️ AI Enablement, Evaluation & Governance
+## 🛡️ AI Enablement, Evaluation & Operational Assurance
 
 | Project | What it demonstrates |
 |---|---|
@@ -36,4 +41,4 @@ Shared terms are defined once in the [trust vocabulary](trust-vocabulary.md) so 
 - **Distinguish warnings from blocks.** I distinguish code-enforced controls from warnings and identify decisions that require manual review.
 - **Boundaries before features.** Privacy, governance, and non-claims are written down before intake pipelines are built.
 
-*AI enablement · workflow automation · evaluation · environmental science · GIS — Lake County, CA*
+*AI enablement · evaluation · operations · governance · environmental science · GIS — Lake County, CA*
